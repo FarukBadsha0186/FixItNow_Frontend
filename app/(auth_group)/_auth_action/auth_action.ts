@@ -8,24 +8,16 @@ import { redirect } from "next/navigation"
 import jwt, { JwtPayload } from "jsonwebtoken"
 import { z } from "zod"
 
-// export type LoginState = {
-//   success: boolean
-//   statusCode?: number
-//   message? : string
-//   data?: {
-//     accessToken?: string
-//     refreshToken?: string
-//   }
-//}
 export type LoginState = {
   success: boolean
   statusCode?: number
-  message: string  
+  message : any
   data?: {
     accessToken?: string
     refreshToken?: string
   }
 }
+
 export type RegisterState = {
   success: boolean
   errors?: { field: string; message: string }[]
