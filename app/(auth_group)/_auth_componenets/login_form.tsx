@@ -82,6 +82,8 @@ import { useRouter } from "next/navigation"
 const initialState: LoginState = {
   success: false,
   message: "",
+   redirectTo: "", 
+  
 }
 
 const LoginForm = () => {

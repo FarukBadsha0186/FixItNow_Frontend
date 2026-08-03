@@ -12,6 +12,7 @@ export type LoginState = {
   success: boolean
   statusCode?: number
   message : any
+  redirectTo?: string 
   data?: {
     accessToken?: string
     refreshToken?: string
