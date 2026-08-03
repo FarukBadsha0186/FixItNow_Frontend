@@ -27,6 +27,76 @@ export type RegisterState = {
 
 // LOGIN ACTION
 
+// export const loginAction = async (prevState: LoginState, formData: FormData) => {
+//   const email = formData.get("email")
+//   const password = formData.get("password")
+
+//   try {
+//     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/auth/login`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ email, password }),
+//     })
+
+//     const result = await res.json()
+
+//     if (!result.success) {
+//       return { success: false, message: result.message || "Invalid credentials" }
+//     }
+
+//     const accessToken = result.data?.accessToken || result.accessToken
+//     const refreshToken = result.data?.refreshToken || result.refreshToken
+
+//     if (!accessToken) {
+//       return { success: false, message: "No access token received" }
+//     }
+
+//     // ✅ Decode token to get role
+//     const decoded = jwt.decode(accessToken) as JwtPayload
+//     const role = decoded?.role || "CUSTOMER"
+
+//     // ✅ Set cookies
+//     const cookieStore = await cookies()
+//     cookieStore.set("accessToken", accessToken, {
+//       httpOnly: true,
+//       maxAge: 60 * 60 * 1,
+//       sameSite: "lax",
+//       path: "/",
+//     })
+
+//     if (refreshToken) {
+//       cookieStore.set("refreshToken", refreshToken, {
+//         httpOnly: true,
+//         maxAge: 60 * 60 * 5,
+//         sameSite: "lax",
+//         path: "/",
+//       })
+//     }
+
+//     // ✅ Redirect based on role
+//     if (role === "ADMIN") {
+//       redirect("/admin_dashboard")
+//     } else if (role === "TECHNICIAN") {
+//       redirect("/technician_dashboard")
+//     } else {
+//       redirect("/customer_dashboard")
+//     }
+
+//     return { success: true, message: "Login successful" }
+
+//   } catch (error) {
+//     // ✅ Handle redirect errors (Next.js intentional)
+//     if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+//       throw error
+//     }
+
+//     console.error("Login error:", error)
+//     return { success: false, message: "Something went wrong. Please try again." }
+//   }
+// }
+
+
+// LOGIN ACTION
 export const loginAction = async (prevState: LoginState, formData: FormData) => {
   const email = formData.get("email")
   const password = formData.get("password")
@@ -51,11 +121,9 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
       return { success: false, message: "No access token received" }
     }
 
-    // ✅ Decode token to get role
     const decoded = jwt.decode(accessToken) as JwtPayload
     const role = decoded?.role || "CUSTOMER"
 
-    // ✅ Set cookies
     const cookieStore = await cookies()
     cookieStore.set("accessToken", accessToken, {
       httpOnly: true,
@@ -73,19 +141,23 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
       })
     }
 
-    // ✅ Redirect based on role
+    // ✅ Return redirectTo instead of redirect()
+    let redirectTo = "/"
     if (role === "ADMIN") {
-      redirect("/admin_dashboard")
+      redirectTo = "/admin_dashboard"
     } else if (role === "TECHNICIAN") {
-      redirect("/technician_dashboard")
+      redirectTo = "/technician_dashboard"
     } else {
-      redirect("/customer_dashboard")
+      redirectTo = "/customer_dashboard"
     }
 
-    return { success: true, message: "Login successful" }
+    return { 
+      success: true, 
+      message: "Login successful",
+      redirectTo  // ✅ Send redirect URL
+    }
 
   } catch (error) {
-    // ✅ Handle redirect errors (Next.js intentional)
     if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
       throw error
     }
@@ -94,6 +166,8 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
     return { success: false, message: "Something went wrong. Please try again." }
   }
 }
+
+// ... registerSchema and registerUser remain same
 
 // ============================================
 // REGISTER SCHEMA
