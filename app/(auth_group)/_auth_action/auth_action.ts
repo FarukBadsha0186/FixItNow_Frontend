@@ -98,6 +98,80 @@ export type RegisterState = {
 
 
 // LOGIN ACTION
+// export const loginAction = async (prevState: LoginState, formData: FormData) => {
+//   const email = formData.get("email")
+//   const password = formData.get("password")
+
+//   try {
+//     const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/auth/login`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ email, password }),
+//     })
+
+//     const result = await res.json()
+
+//     if (!result.success) {
+//       return { success: false, message: result.message || "Invalid credentials" }
+//     }
+
+//     const accessToken = result.data?.accessToken || result.accessToken
+//     const refreshToken = result.data?.refreshToken || result.refreshToken
+
+//     if (!accessToken) {
+//       return { success: false, message: "No access token received" }
+//     }
+
+//     const decoded = jwt.decode(accessToken) as JwtPayload
+//     const role = decoded?.role || "CUSTOMER"
+
+//     const cookieStore = await cookies()
+//     cookieStore.set("accessToken", accessToken, {
+//       httpOnly: true,
+//       maxAge: 60 * 60 * 1,
+//       sameSite: "lax",
+//       path: "/",
+//     })
+
+//     if (refreshToken) {
+//       cookieStore.set("refreshToken", refreshToken, {
+//         httpOnly: true,
+//         maxAge: 60 * 60 * 5,
+//         sameSite: "lax",
+//         path: "/",
+//       })
+//     }
+
+//     // ✅ Return redirectTo instead of redirect()
+//     let redirectTo = "/"
+//     if (role === "ADMIN") {
+//       redirectTo = "/admin_dashboard"
+//     } else if (role === "TECHNICIAN") {
+//       redirectTo = "/technician_dashboard"
+//     } else {
+//       redirectTo = "/customer_dashboard"
+//     }
+
+//     return { 
+//       success: true, 
+//       message: "Login successful",
+//       redirectTo  // ✅ Send redirect URL
+//     }
+
+//   } catch (error) {
+//     if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
+//       throw error
+//     }
+
+//     console.error("Login error:", error)
+//     return { success: false, message: "Something went wrong. Please try again." }
+//   }
+// }
+
+
+
+
+
 export const loginAction = async (prevState: LoginState, formData: FormData) => {
   const email = formData.get("email")
   const password = formData.get("password")
@@ -125,24 +199,7 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
     const decoded = jwt.decode(accessToken) as JwtPayload
     const role = decoded?.role || "CUSTOMER"
 
-    const cookieStore = await cookies()
-    cookieStore.set("accessToken", accessToken, {
-      httpOnly: true,
-      maxAge: 60 * 60 * 1,
-      sameSite: "lax",
-      path: "/",
-    })
-
-    if (refreshToken) {
-      cookieStore.set("refreshToken", refreshToken, {
-        httpOnly: true,
-        maxAge: 60 * 60 * 5,
-        sameSite: "lax",
-        path: "/",
-      })
-    }
-
-    // ✅ Return redirectTo instead of redirect()
+    // ✅ Return tokens to client (instead of setting cookies here)
     let redirectTo = "/"
     if (role === "ADMIN") {
       redirectTo = "/admin_dashboard"
@@ -152,21 +209,22 @@ export const loginAction = async (prevState: LoginState, formData: FormData) => 
       redirectTo = "/customer_dashboard"
     }
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       message: "Login successful",
-      redirectTo  // ✅ Send redirect URL
+      redirectTo,
+      data: {
+        accessToken,
+        refreshToken,
+      }
     }
 
   } catch (error) {
-    if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
-      throw error
-    }
-
     console.error("Login error:", error)
     return { success: false, message: "Something went wrong. Please try again." }
   }
 }
+
 
 // ... registerSchema and registerUser remain same
 
