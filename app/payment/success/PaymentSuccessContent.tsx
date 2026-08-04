@@ -27,29 +27,19 @@ export default function PaymentSuccessContent() {
       setPaymentData({ bookingId, amount: parseFloat(amount) })
     }
 
-    // ✅ Confirm payment automatically
     if (sessionId) {
       const confirm = async () => {
         try {
-          console.log("📌 Starting payment confirmation with sessionId:", sessionId)
           const result = await confirmPayment(sessionId)
-          
           if (result.success) {
-            console.log("✅ Payment confirmed:", result)
             setConfirmed(true)
             toast.success("Payment confirmed! 🎉")
-            
-            // ✅ Redirect to dashboard after 2 seconds
-            setTimeout(() => {
-              router.push('/customer_dashboard')
-            }, 2000)
+            setTimeout(() => router.push('/customer_dashboard'), 2000)
           } else {
-            console.error("❌ Payment confirmation failed:", result)
             toast.error(result.message || "Payment confirmation failed")
             setLoading(false)
           }
         } catch (error) {
-          console.error("❌ Error confirming payment:", error)
           toast.error("Something went wrong")
           setLoading(false)
         }
@@ -59,11 +49,8 @@ export default function PaymentSuccessContent() {
       setLoading(false)
     }
 
-    // ✅ Auto redirect after 5 seconds (fallback)
     const timer = setTimeout(() => {
-      if (!confirmed) {
-        router.push('/customer_dashboard')
-      }
+      if (!confirmed) router.push('/customer_dashboard')
     }, 8000)
 
     return () => clearTimeout(timer)
@@ -88,9 +75,7 @@ export default function PaymentSuccessContent() {
             </div>
           </div>
           <CardTitle className="text-2xl">Payment Successful! 🎉</CardTitle>
-          <CardDescription>
-            Your payment has been processed successfully.
-          </CardDescription>
+          <CardDescription>Your payment has been processed successfully.</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -109,7 +94,7 @@ export default function PaymentSuccessContent() {
 
           {confirmed && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <p className="text-sm text-green-700">✅ Payment confirmed! Redirecting to dashboard...</p>
+              <p className="text-sm text-green-700">✅ Payment confirmed! Redirecting...</p>
             </div>
           )}
 
