@@ -760,14 +760,69 @@ export async function getPayments() {
   }
 }
 
-// ✅ Confirm Payment (Protected - Needs Token)
+// // ✅ Confirm Payment (Protected - Needs Token)
+// export async function confirmPayment(paymentId: string) {
+//   try {
+//     if (!paymentId) {
+//       return { success: false, message: "Payment ID is required" }
+//     }
+
+//     // ✅ Get Token
+//     const token = await getToken()
+//     if (!token) {
+//       return { success: false, message: "Unauthorized - Please log in" }
+//     }
+
+//     console.log("📌 Confirming payment:", paymentId)
+
+//     const res = await fetch(
+//       `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/payments/confirm`,
+//       {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           "Authorization": `Bearer ${token}`,  // ✅ Token যোগ করেছি
+//         },
+//         body: JSON.stringify({ paymentId }),
+//       }
+//     )
+
+//     const result = await res.json()
+//     console.log("🔍 Confirm Payment Response:", result)
+
+//     if (!res.ok) {
+//       return { 
+//         success: false, 
+//         message: result.message || "Payment confirmation failed" 
+//       }
+//     }
+
+//     // ✅ Revalidate paths
+//     revalidatePath("/customer_dashboard")
+//     revalidatePath("/customer_dashboard/payments")
+//     revalidatePath("/customer_dashboard/bookings")
+
+//     return {
+//       success: true,
+//       data: result.data,
+//       message: "Payment confirmed successfully",
+//     }
+
+//   } catch (error) {
+//     console.error("Error confirming payment:", error)
+//     return { 
+//       success: false, 
+//       message: "Something went wrong. Please try again." 
+//     }
+//   }
+// }
+
 export async function confirmPayment(paymentId: string) {
   try {
     if (!paymentId) {
       return { success: false, message: "Payment ID is required" }
     }
 
-    // ✅ Get Token
     const token = await getToken()
     if (!token) {
       return { success: false, message: "Unauthorized - Please log in" }
@@ -781,7 +836,7 @@ export async function confirmPayment(paymentId: string) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,  // ✅ Token যোগ করেছি
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify({ paymentId }),
       }
@@ -797,10 +852,21 @@ export async function confirmPayment(paymentId: string) {
       }
     }
 
-    // ✅ Revalidate paths
+    // ✅ সব dashboard paths revalidate করুন
+    revalidatePath("/")
     revalidatePath("/customer_dashboard")
-    revalidatePath("/customer_dashboard/payments")
     revalidatePath("/customer_dashboard/bookings")
+    revalidatePath("/customer_dashboard/payments")
+    
+    // ✅ Technician dashboard revalidate করুন
+    revalidatePath("/technician_dashboard")
+    revalidatePath("/technician_dashboard/bookings")
+    
+    // ✅ Admin dashboard revalidate করুন
+    revalidatePath("/admin_dashboard")
+    revalidatePath("/admin_dashboard/bookings")
+
+    console.log("✅ All paths revalidated")
 
     return {
       success: true,
