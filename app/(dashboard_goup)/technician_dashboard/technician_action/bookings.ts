@@ -42,7 +42,34 @@ async function updateBookingStatus(bookingId: string, status: string) {
       return { success: false, message: "Unauthorized" }
     }
 
-    // ✅ ETA THIK - Shudhu status body te pathano
+    // ✅ Check current status first
+    const checkRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/bookings/${bookingId}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    
+    if (!checkRes.ok) {
+      return { success: false, message: "Failed to check booking status" }
+    }
+    
+    const checkData = await checkRes.json()
+    const currentStatus = checkData.data?.status
+    
+    // ✅ If already in target status, return success without API call
+    if (currentStatus === status) {
+      return { success: true, message: `Booking already ${status.toLowerCase()}` }
+    }
+
+    // ✅ Validate transition
+    if (status === 'IN_PROGRESS' && currentStatus !== 'PAID') {
+      return { success: false, message: "Booking must be PAID before starting job" }
+    }
+
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/bookings/${bookingId}`,
       {
@@ -90,8 +117,48 @@ export async function declineBooking(bookingId: string) {
 }
 
 // 3️⃣ MARK IN-PROGRESS
+// export async function markInProgress(bookingId: string) {
+//   return updateBookingStatus(bookingId, "IN_PROGRESS")
+// }
+
+// 3️⃣ MARK IN-PROGRESS
 export async function markInProgress(bookingId: string) {
-  return updateBookingStatus(bookingId, "IN_PROGRESS")
+  // ✅ First check if already IN_PROGRESS
+  try {
+    const token = await getToken()
+    if (!token) {
+      return { success: false, message: "Unauthorized" }
+    }
+
+    const checkRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/bookings/${bookingId}`,
+      {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    
+    if (!checkRes.ok) {
+      return { success: false, message: "Failed to check booking status" }
+    }
+    
+    const checkData = await checkRes.json()
+    
+    if (checkData.data?.status === 'IN_PROGRESS') {
+      return { success: false, message: "Job is already in progress" }
+    }
+    
+    if (checkData.data?.status !== 'PAID') {
+      return { success: false, message: "Booking must be PAID before starting job" }
+    }
+
+    return updateBookingStatus(bookingId, "IN_PROGRESS")
+  } catch (error) {
+    console.error("Error checking booking status:", error)
+    return { success: false, message: "Something went wrong" }
+  }
 }
 
 // 4️⃣ MARK COMPLETED

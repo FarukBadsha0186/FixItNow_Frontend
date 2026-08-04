@@ -294,97 +294,158 @@ export function DashboardOverview({
     })
   }
 
-  // ✅ Get Action Buttons with Real Actions
-  const getActionButtons = (booking: any) => {
-    if (booking.status === 'REQUESTED') {
-      return (
-        <div className="flex gap-2">
-          <Button 
-            size="sm" 
-            onClick={() => handleAccept(booking.id)}
-            disabled={loadingBookingId === booking.id}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            {loadingBookingId === booking.id ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              'Accept'
-            )}
-          </Button>
+//   // ✅ Get Action Buttons with Real Actions
+//   const getActionButtons = (booking: any) => {
+//     if (booking.status === 'REQUESTED') {
+//       return (
+//         <div className="flex gap-2">
+//           <Button 
+//             size="sm" 
+//             onClick={() => handleAccept(booking.id)}
+//             disabled={loadingBookingId === booking.id}
+//             className="bg-green-600 hover:bg-green-700"
+//           >
+//             {loadingBookingId === booking.id ? (
+//               <Loader2 className="h-3 w-3 animate-spin" />
+//             ) : (
+//               'Accept'
+//             )}
+//           </Button>
 
           
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => handleDecline(booking.id)}
-            disabled={loadingBookingId === booking.id}
-            className="text-red-500 hover:text-red-700"
-          >
-            {loadingBookingId === booking.id ? (
-              <Loader2 className="h-3 w-3 animate-spin" />
-            ) : (
-              'Decline'
-            )}
-          </Button>
-        </div>
-      )
+//           <Button
+//             size="sm"
+//             variant="outline"
+//             onClick={() => handleDecline(booking.id)}
+//             disabled={loadingBookingId === booking.id}
+//             className="text-red-500 hover:text-red-700"
+//           >
+//             {loadingBookingId === booking.id ? (
+//               <Loader2 className="h-3 w-3 animate-spin" />
+//             ) : (
+//               'Decline'
+//             )}
+//           </Button>
+//         </div>
+//       )
 
 
 
       
-    } 
+//     } 
     
-    else if (booking.status === 'ACCEPTED') {
-  return (
-    <Button 
-          size="sm" 
-          onClick={() => handleStartJob(booking.id)}
-          disabled={loadingBookingId === booking.id}
-          className="bg-blue-600 hover:bg-blue-700"
-        >
-          {loadingBookingId === booking.id ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            'Start Job'
-          )}
-        </Button>
-  )
-}
-    
-    
-    else if (booking.status === 'PAID') {
-      return (
+//     else if (booking.status === 'ACCEPTED') {
+//   return (
+//     <Button 
+//           size="sm" 
+//           onClick={() => handleStartJob(booking.id)}
+//           disabled={loadingBookingId === booking.id}
+//           className="bg-blue-600 hover:bg-blue-700"
+//         >
+//           {loadingBookingId === booking.id ? (
+//             <Loader2 className="h-3 w-3 animate-spin" />
+//           ) : (
+//             'Start Job'
+//           )}
+//         </Button>
+//   )
+// }
+//     else if (booking.status === 'PAID') {
+//       return (
+//         <Button 
+//           size="sm" 
+//           onClick={() => handleStartJob(booking.id)}
+//           disabled={loadingBookingId === booking.id}
+//           className="bg-blue-600 hover:bg-blue-700"
+//         >
+//           {loadingBookingId === booking.id ? (
+//             <Loader2 className="h-3 w-3 animate-spin" />
+//           ) : (
+//             'Start Job'
+//           )}
+//         </Button>
+//       )
+//     } else if (booking.status === 'IN_PROGRESS') {
+//       return (
+//         <Button 
+//           size="sm" 
+//           onClick={() => handleComplete(booking.id)}
+//           disabled={loadingBookingId === booking.id}
+//           className="bg-purple-600 hover:bg-purple-700"
+//         >
+//           {loadingBookingId === booking.id ? (
+//             <Loader2 className="h-3 w-3 animate-spin" />
+//           ) : (
+//             'Mark Complete'
+//           )}
+//         </Button>
+//       )
+//     }
+//     return <span className="text-muted-foreground">—</span>
+//   }
+// ✅ Get Action Buttons with Real Actions
+const getActionButtons = (booking: any) => {
+  if (booking.status === 'REQUESTED') {
+    return (
+      <div className="flex gap-2">
         <Button 
           size="sm" 
-          onClick={() => handleStartJob(booking.id)}
+          onClick={() => handleAccept(booking.id)}
           disabled={loadingBookingId === booking.id}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-green-600 hover:bg-green-700"
         >
-          {loadingBookingId === booking.id ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            'Start Job'
-          )}
+          {loadingBookingId === booking.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Accept'}
         </Button>
-      )
-    } else if (booking.status === 'IN_PROGRESS') {
-      return (
-        <Button 
-          size="sm" 
-          onClick={() => handleComplete(booking.id)}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => handleDecline(booking.id)}
           disabled={loadingBookingId === booking.id}
-          className="bg-purple-600 hover:bg-purple-700"
+          className="text-red-500 hover:text-red-700"
         >
-          {loadingBookingId === booking.id ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            'Mark Complete'
-          )}
+          {loadingBookingId === booking.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Decline'}
         </Button>
-      )
-    }
-    return <span className="text-muted-foreground">—</span>
+      </div>
+    )
+  } 
+  
+  // ✅ FIX: ACCEPTED status - show waiting message
+  else if (booking.status === 'ACCEPTED') {
+    return (
+      <span className="text-sm text-yellow-600 font-medium">
+        ⏳ Waiting for payment...
+      </span>
+    )
+  } 
+  
+  else if (booking.status === 'PAID') {
+    return (
+      <Button 
+        size="sm" 
+        onClick={() => handleStartJob(booking.id)}
+        disabled={loadingBookingId === booking.id}
+        className="bg-blue-600 hover:bg-blue-700"
+      >
+        {loadingBookingId === booking.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Start Job'}
+      </Button>
+    )
+  } 
+  
+  else if (booking.status === 'IN_PROGRESS') {
+    return (
+      <Button 
+        size="sm" 
+        onClick={() => handleComplete(booking.id)}
+        disabled={loadingBookingId === booking.id}
+        className="bg-purple-600 hover:bg-purple-700"
+      >
+        {loadingBookingId === booking.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Mark Complete'}
+      </Button>
+    )
   }
+  
+  return <span className="text-muted-foreground">—</span>
+}
 
   return (
     <div className="space-y-6 p-6">
