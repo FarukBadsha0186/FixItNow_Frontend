@@ -45,7 +45,7 @@ export const loginAction = async (
         console.log("🔍 Sending Login Request:", { email });
 
         // ✅ FIXED: Environment Variable
-        const res = await fetch(`${process.env.BACKEND_API_URL}/api/auth/login`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/auth/login`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -105,11 +105,7 @@ export const loginAction = async (
         const role = decodedToken?.role || "CUSTOMER";
         console.log("🎭 User Role:", role);
 
-        // ✅ FIXED: Role-based Redirect (আপনার মতো)
-        // আপনি যদি redirectTo চান তাহলে:
-        // if (redirectTo && typeof redirectTo === "string" && redirectTo.startsWith("/") && !redirectTo.startsWith("//")){
-        //     redirect(redirectTo)
-        // }
+       
 
         if (role === "ADMIN") {
             redirect("/admin_dashboard");
