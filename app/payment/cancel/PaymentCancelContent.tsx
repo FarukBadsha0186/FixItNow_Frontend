@@ -1,43 +1,50 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { XCircle } from "lucide-react"
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { XCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import Link from 'next/link'
 
-export default function PaymentCancelPage() {
+export default function PaymentCancelContent() {
   const router = useRouter()
 
+  useEffect(() => {
+    // ✅ Auto redirect after 3 seconds
+    const timer = setTimeout(() => {
+      router.push('/customer_dashboard')
+    }, 3000)
+
+    return () => clearTimeout(timer)
+  }, [router])
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-orange-50">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <XCircle className="w-12 h-12 text-red-600 mx-auto mb-4" />
-          <CardTitle className="text-2xl">Payment Cancelled</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-muted-foreground">
-            Your payment has been cancelled.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            You can try again anytime.
-          </p>
-          <div className="flex gap-3">
-            <Button 
-              variant="outline"
-              onClick={() => router.back()}
-              className="flex-1"
-            >
-              Go Back
-            </Button>
-            <Button 
-              onClick={() => router.push("/customer_dashboard")}
-              className="flex-1"
-            >
-              Dashboard
-            </Button>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <Card className="w-full max-w-md text-center">
+        <CardHeader>
+          <div className="flex justify-center mb-4">
+            <div className="rounded-full bg-red-100 p-3">
+              <XCircle className="h-12 w-12 text-red-600" />
+            </div>
           </div>
+          <CardTitle className="text-2xl">Payment Cancelled</CardTitle>
+          <CardDescription>
+            Your payment was not completed. You can try again.
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Redirecting to dashboard...
+          </p>
         </CardContent>
+
+        <CardFooter>
+          <Link href="/customer_dashboard" className="w-full">
+            <Button className="w-full">Go to Dashboard</Button>
+          </Link>
+        </CardFooter>
       </Card>
     </div>
   )
