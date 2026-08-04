@@ -104,7 +104,7 @@ export async function getDashboardData() {
 
     // ✅ 2. Get Bookings
     const bookingsRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/bookings`,
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/booking`,
       {
         headers: {
           "Authorization": `Bearer ${token}`,
