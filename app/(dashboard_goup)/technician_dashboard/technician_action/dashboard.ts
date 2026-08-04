@@ -104,7 +104,7 @@ export async function getDashboardData() {
 
     // ✅ 2. Get Bookings
     const bookingsRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/booking`,
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/bookings`,
       {
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -147,7 +147,7 @@ export async function getDashboardData() {
 export async function refreshDashboard() {
   try {
     revalidatePath("/technician_dashboard")
-    revalidatePath("/technician_dashboard/booking")
+    revalidatePath("/technician_dashboard/bookings")
     console.log("✅ Technician dashboard refreshed")
     return { success: true }
   } catch (error) {
