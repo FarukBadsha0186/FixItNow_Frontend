@@ -1,86 +1,50 @@
 "use client"
 
-import { useEffect, useState } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import { CheckCircle, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import Link from 'next/link'
+import { useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CheckCircle } from "lucide-react"
 
-export default function PaymentSuccessContent() {
-  const searchParams = useSearchParams()
+export default function PaymentSuccessPage() {
   const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [paymentData, setPaymentData] = useState<{ bookingId: string; amount: number } | null>(null)
+  const searchParams = useSearchParams()
+  const sessionId = searchParams.get("session_id")
 
   useEffect(() => {
-    const bookingId = searchParams.get('bookingId')
-    const amount = searchParams.get('amount')
-
-    if (bookingId && amount) {
-      setPaymentData({ bookingId, amount: parseFloat(amount) })
-    }
-
-    setLoading(false)
-
-    // ✅ 5 seconds por auto redirect
     const timer = setTimeout(() => {
-      router.push('/customer_dashboard')
-    }, 5000)
+      router.push("/customer_dashboard")
+    }, 3000)
 
     return () => clearTimeout(timer)
-  }, [searchParams, router])
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    )
-  }
+  }, [router])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md text-center">
-        <CardHeader>
-          <div className="flex justify-center mb-4">
-            <div className="rounded-full bg-green-100 p-3">
-              <CheckCircle className="h-12 w-12 text-green-600" />
-            </div>
-          </div>
-          <CardTitle className="text-2xl">Payment Successful! 🎉</CardTitle>
-          <CardDescription>
-            Your payment has been processed successfully.
-          </CardDescription>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
+          <CardTitle className="text-2xl">Payment Successful! ✅</CardTitle>
         </CardHeader>
-
-        <CardContent className="space-y-4">
-          {paymentData && (
-            <div className="bg-muted p-4 rounded-lg space-y-2 text-left">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Booking ID</span>
-                <span className="font-medium">#{paymentData.bookingId.slice(0, 8)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Amount Paid</span>
-                <span className="font-medium">${paymentData.amount.toFixed(2)}</span>
-              </div>
-            </div>
-          )}
-
-          <p className="text-sm text-muted-foreground">
-            You will be redirected to your dashboard in a few seconds.
+        <CardContent className="text-center space-y-4">
+          <p className="text-muted-foreground">
+            Your payment has been processed successfully.
           </p>
+          {sessionId && (
+            <p className="text-xs text-muted-foreground font-mono bg-muted p-2 rounded">
+              {sessionId.slice(0, 30)}...
+            </p>
+          )}
+          <p className="text-sm font-medium text-amber-600">
+            Redirecting to dashboard in 3 seconds...
+          </p>
+          <Button 
+            onClick={() => router.push("/customer_dashboard")}
+            className="w-full bg-green-600 hover:bg-green-700"
+          >
+            Go to Dashboard Now
+          </Button>
         </CardContent>
-
-        <CardFooter className="flex flex-col gap-3">
-          <Link href="/customer_dashboard" className="w-full">
-            <Button className="w-full">Go to Dashboard</Button>
-          </Link>
-          <Link href="/services" className="w-full">
-            <Button variant="outline" className="w-full">Browse More Services</Button>
-          </Link>
-        </CardFooter>
       </Card>
     </div>
   )
