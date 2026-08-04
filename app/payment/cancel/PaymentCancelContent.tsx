@@ -18,9 +18,10 @@ export default function PaymentCancelContent() {
     setBookingId(id)
     setLoading(false)
 
+    // ✅ 5 seconds por auto redirect
     const timer = setTimeout(() => {
       router.push('/customer_dashboard')
-    }, 10000)
+    }, 5000)
 
     return () => clearTimeout(timer)
   }, [searchParams, router])
