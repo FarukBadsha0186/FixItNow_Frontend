@@ -244,25 +244,45 @@ export default function PaymentPage() {
     fetchData()
   }, [bookingId, router])
 
-  const handlePay = async () => {
-    setSubmitting(true)
-    try {
-      const result = await createPayment(bookingId)
-      console.log("🔍 Payment Result:", result)
+  // const handlePay = async () => {
+  //   setSubmitting(true)
+  //   try {
+  //     const result = await createPayment(bookingId)
+  //     console.log("🔍 Payment Result:", result)
       
-      if (result.success && result.data?.paymentUrl) {
-        // ✅ Redirect to Stripe Checkout
-        window.location.href = result.data.paymentUrl
-      } else {
-        toast.error(result.message || "Payment initiation failed")
-      }
-    } catch (error) {
-      console.error("Payment error:", error)
-      toast.error("Something went wrong")
-    } finally {
-      setSubmitting(false)
+  //     if (result.success && result.data?.paymentUrl) {
+  //       // ✅ Redirect to Stripe Checkout
+  //       window.location.href = result.data.paymentUrl
+  //     } else {
+  //       toast.error(result.message || "Payment initiation failed")
+  //     }
+  //   } catch (error) {
+  //     console.error("Payment error:", error)
+  //     toast.error("Something went wrong")
+  //   } finally {
+  //     setSubmitting(false)
+  //   }
+  // }
+
+  const handlePay = async () => {
+  setSubmitting(true)
+  try {
+    const result = await createPayment(bookingId)
+    console.log("🔍 Payment Result:", result)
+    
+    if (result.success && result.data?.paymentUrl) {
+      // ✅ Redirect to Stripe Checkout
+      window.location.href = result.data.paymentUrl
+    } else {
+      toast.error(result.message || "Payment initiation failed")
     }
+  } catch (error) {
+    console.error("Payment error:", error)
+    toast.error("Something went wrong")
+  } finally {
+    setSubmitting(false)
   }
+}
 
   if (loading) {
     return (
