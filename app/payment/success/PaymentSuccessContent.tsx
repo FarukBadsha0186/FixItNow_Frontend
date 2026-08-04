@@ -1,55 +1,3 @@
-// "use client"
-
-// import { useEffect } from 'react'
-// import { useRouter } from 'next/navigation'
-// import { CheckCircle } from 'lucide-react'
-// import { Button } from '@/components/ui/button'
-// import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-// import Link from 'next/link'
-
-// export default function PaymentSuccessContent() {
-//   const router = useRouter()
-
-//   useEffect(() => {
-//     // ✅ Auto redirect after 3 seconds
-//     const timer = setTimeout(() => {
-//       router.push('/customer_dashboard')
-//     }, 3000)
-
-//     return () => clearTimeout(timer)
-//   }, [router])
-
-//   return (
-//     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-//       <Card className="w-full max-w-md text-center">
-//         <CardHeader>
-//           <div className="flex justify-center mb-4">
-//             <div className="rounded-full bg-green-100 p-3">
-//               <CheckCircle className="h-12 w-12 text-green-600" />
-//             </div>
-//           </div>
-//           <CardTitle className="text-2xl">Payment Successful! 🎉</CardTitle>
-//           <CardDescription>
-//             Your payment has been processed successfully.
-//           </CardDescription>
-//         </CardHeader>
-
-//         <CardContent>
-//           <p className="text-sm text-muted-foreground">
-//             Redirecting to dashboard...
-//           </p>
-//         </CardContent>
-
-//         <CardFooter>
-//           <Link href="/customer_dashboard" className="w-full">
-//             <Button className="w-full">Go to Dashboard</Button>
-//           </Link>
-//         </CardFooter>
-//       </Card>
-//     </div>
-//   )
-// }
-
 "use client"
 
 import { useEffect, useState } from 'react'
@@ -66,6 +14,7 @@ export default function PaymentSuccessContent() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [paymentData, setPaymentData] = useState<{ bookingId: string; amount: number } | null>(null)
+  const [confirmed, setConfirmed] = useState(false)
 
   useEffect(() => {
     const bookingId = searchParams.get('bookingId')
@@ -82,17 +31,26 @@ export default function PaymentSuccessContent() {
     if (sessionId) {
       const confirm = async () => {
         try {
+          console.log("📌 Starting payment confirmation with sessionId:", sessionId)
           const result = await confirmPayment(sessionId)
+          
           if (result.success) {
             console.log("✅ Payment confirmed:", result)
+            setConfirmed(true)
             toast.success("Payment confirmed! 🎉")
+            
+            // ✅ Redirect to dashboard after 2 seconds
+            setTimeout(() => {
+              router.push('/customer_dashboard')
+            }, 2000)
           } else {
             console.error("❌ Payment confirmation failed:", result)
-            toast.error("Payment confirmation failed")
+            toast.error(result.message || "Payment confirmation failed")
+            setLoading(false)
           }
         } catch (error) {
           console.error("❌ Error confirming payment:", error)
-        } finally {
+          toast.error("Something went wrong")
           setLoading(false)
         }
       }
@@ -101,18 +59,21 @@ export default function PaymentSuccessContent() {
       setLoading(false)
     }
 
-    // ✅ Auto redirect after 5 seconds
+    // ✅ Auto redirect after 5 seconds (fallback)
     const timer = setTimeout(() => {
-      router.push('/customer_dashboard')
-    }, 5000)
+      if (!confirmed) {
+        router.push('/customer_dashboard')
+      }
+    }, 8000)
 
     return () => clearTimeout(timer)
-  }, [searchParams, router])
+  }, [searchParams, router, confirmed])
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Processing payment confirmation...</p>
       </div>
     )
   }
@@ -143,6 +104,12 @@ export default function PaymentSuccessContent() {
                 <span className="text-muted-foreground">Amount Paid</span>
                 <span className="font-medium">${paymentData.amount.toFixed(2)}</span>
               </div>
+            </div>
+          )}
+
+          {confirmed && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <p className="text-sm text-green-700">✅ Payment confirmed! Redirecting to dashboard...</p>
             </div>
           )}
 
