@@ -147,7 +147,7 @@ export async function getDashboardData() {
 export async function refreshDashboard() {
   try {
     revalidatePath("/technician_dashboard")
-    revalidatePath("/technician_dashboard/bookings")
+    revalidatePath("/technician_dashboard/booking")
     console.log("✅ Technician dashboard refreshed")
     return { success: true }
   } catch (error) {
