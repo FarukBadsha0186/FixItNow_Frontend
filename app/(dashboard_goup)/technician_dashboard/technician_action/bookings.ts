@@ -26,7 +26,7 @@ export interface Booking {
 }
 
 // ============================================
-// ✅ Helper Functions
+// Helper Functions
 // ============================================
 
 const getToken = async (): Promise<string | null> => {
@@ -34,139 +34,89 @@ const getToken = async (): Promise<string | null> => {
   return cookieStore.get("accessToken")?.value || null
 }
 
-// ✅ SINGLE FUNCTION - Sob status update er jonno
+// ============================================
+// ✅ Simplified: Direct PATCH Only (No Redundant Check)
+// ============================================
+
 async function updateBookingStatus(bookingId: string, status: string) {
   try {
+    console.log(`🔵 Updating booking: ${bookingId} -> ${status}`)
+    
+    // ✅ 1. Token Check
     const token = await getToken()
     if (!token) {
+      console.log("🔴 Token missing")
       return { success: false, message: "Unauthorized" }
     }
 
-    // ✅ Check current status first
-    const checkRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/bookings/${bookingId}`,
-      {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    )
-    
-    if (!checkRes.ok) {
-      return { success: false, message: "Failed to check booking status" }
-    }
-    
-    const checkData = await checkRes.json()
-    const currentStatus = checkData.data?.status
-    
-    // ✅ If already in target status, return success without API call
-    if (currentStatus === status) {
-      return { success: true, message: `Booking already ${status.toLowerCase()}` }
-    }
+    // ✅ 2. Direct PATCH (Backend validates status transition)
+    const url = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/bookings/${bookingId}`
+    console.log(`🔵 Request URL: ${url}`)
 
-    // ✅ Validate transition
-    if (status === 'IN_PROGRESS' && currentStatus !== 'PAID') {
-      return { success: false, message: "Booking must be PAID before starting job" }
-    }
-
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/bookings/${bookingId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
-      }
-    )
+    const res = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    })
 
     const data = await res.json()
+    console.log(`🔵 Response Status: ${res.status}`)
+    console.log(`🔵 Response Data:`, data)
 
+    // ✅ 3. Error Handling
     if (!res.ok) {
-      return { success: false, message: data.message || `Failed to ${status}` }
+      const errorMsg = data.message || data.error || `Failed to update booking status`
+      console.error(`🔴 Error: ${errorMsg}`)
+      return { success: false, message: errorMsg }
     }
 
-    // ✅ Revalidate all paths
-    revalidatePath("/technician_dashboard/dashboard")
+    // ✅ 4. Success - Revalidate
+    console.log(`✅ Booking updated successfully`)
+    
+    revalidatePath("/technician_dashboard")
     revalidatePath("/technician_dashboard/bookings")
-    revalidatePath("/customer_dashboard")
-    revalidatePath("/customer_dashboard/bookings")
 
-    return { success: true, data: data.data, message: `Booking ${status.toLowerCase()}` }
+    return { 
+      success: true, 
+      data: data.data, 
+      message: `Booking ${status.toLowerCase()}` 
+    }
 
   } catch (error) {
-    console.error(`Error updating booking to ${status}:`, error)
+    console.error(`🔴 Catch Error:`, error)
     return { success: false, message: "Something went wrong" }
   }
 }
 
 // ============================================
-// ✅ EXPORTED ACTIONS
+// ✅ Exported Actions (Simplified)
 // ============================================
 
-// 1️⃣ ACCEPT BOOKING
 export async function acceptBooking(bookingId: string) {
   return updateBookingStatus(bookingId, "ACCEPTED")
 }
 
-// 2️⃣ DECLINE BOOKING
 export async function declineBooking(bookingId: string) {
   return updateBookingStatus(bookingId, "DECLINED")
 }
 
-// 3️⃣ MARK IN-PROGRESS
-// export async function markInProgress(bookingId: string) {
-//   return updateBookingStatus(bookingId, "IN_PROGRESS")
-// }
-
-// 3️⃣ MARK IN-PROGRESS
 export async function markInProgress(bookingId: string) {
-  // ✅ First check if already IN_PROGRESS
-  try {
-    const token = await getToken()
-    if (!token) {
-      return { success: false, message: "Unauthorized" }
-    }
-
-    const checkRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/bookings/${bookingId}`,
-      {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    )
-    
-    if (!checkRes.ok) {
-      return { success: false, message: "Failed to check booking status" }
-    }
-    
-    const checkData = await checkRes.json()
-    
-    if (checkData.data?.status === 'IN_PROGRESS') {
-      return { success: false, message: "Job is already in progress" }
-    }
-    
-    if (checkData.data?.status !== 'PAID') {
-      return { success: false, message: "Booking must be PAID before starting job" }
-    }
-
-    return updateBookingStatus(bookingId, "IN_PROGRESS")
-  } catch (error) {
-    console.error("Error checking booking status:", error)
-    return { success: false, message: "Something went wrong" }
-  }
+  // ✅ No redundant check - Backend validates transition from PAID to IN_PROGRESS
+  return updateBookingStatus(bookingId, "IN_PROGRESS")
 }
 
-// 4️⃣ MARK COMPLETED
 export async function markCompleted(bookingId: string) {
+  // ✅ No redundant check - Backend validates transition from IN_PROGRESS to COMPLETED
   return updateBookingStatus(bookingId, "COMPLETED")
 }
 
-// 5️⃣ GET ALL BOOKINGS
+// ============================================
+// ✅ Get Bookings
+// ============================================
+
 export async function getBookings(status?: string) {
   try {
     const token = await getToken()
@@ -196,12 +146,15 @@ export async function getBookings(status?: string) {
     return { success: true, data: data.data || [] }
 
   } catch (error) {
-    console.error("Error fetching bookings:", error)
+    console.error("❌ Error fetching bookings:", error)
     return { success: false, message: "Failed to load bookings" }
   }
 }
 
-// 6️⃣ GET BOOKING STATS
+// ============================================
+// ✅ Get Booking Stats
+// ============================================
+
 export async function getBookingStats() {
   try {
     const token = await getToken()
@@ -229,7 +182,7 @@ export async function getBookingStats() {
     return { success: true, data: data.data }
 
   } catch (error) {
-    console.error("Error fetching booking stats:", error)
+    console.error("❌ Error fetching stats:", error)
     return { success: false, message: "Failed to load stats" }
   }
 }

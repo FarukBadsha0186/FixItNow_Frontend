@@ -108,7 +108,7 @@ export default function BookingsRoute() {
     <BookingsPage 
       bookings={bookings}
       onUpdateStatus={handleUpdateStatus}
-      onFilterChange={handleFilterChange}  // ✅ Now matches type
+      onFilterChange={handleFilterChange}  
       currentFilter={filterStatus}
     />
   )
