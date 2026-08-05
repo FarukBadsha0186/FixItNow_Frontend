@@ -1,3 +1,4 @@
+
 // "use client"
 
 // import { useState, useEffect } from "react"
@@ -20,8 +21,10 @@
 //   const [bookings, setBookings] = useState<any[]>([])
 //   const [loading, setLoading] = useState(true)
 //   const [processingId, setProcessingId] = useState<string | null>(null)
+//   const [refreshKey, setRefreshKey] = useState(0) // ✅ Force Refresh
 
 //   const fetchBookings = async () => {
+//     setLoading(true)
 //     try {
 //       const result = await getBookings()
 //       if (result.success) {
@@ -36,9 +39,17 @@
 //     }
 //   }
 
+//   // ✅ Effect trigger on refreshKey change
 //   useEffect(() => {
 //     fetchBookings()
-//   }, [])
+//   }, [refreshKey])
+
+//   // ✅ Common function for refresh
+//   const refreshData = async () => {
+//     router.refresh() // Next.js Router Refresh
+//     setRefreshKey(prev => prev + 1) // Force Re-render
+//     await fetchBookings() // Manual Fetch
+//   }
 
 //   const handleAccept = async (bookingId: string) => {
 //     setProcessingId(bookingId)
@@ -46,7 +57,7 @@
 //       const result = await acceptBooking(bookingId)
 //       if (result.success) {
 //         toast.success(result.message || "Booking accepted")
-//         await fetchBookings()
+//         await refreshData() // ✅ Refresh all
 //       } else {
 //         toast.error(result.message || "Failed to accept")
 //       }
@@ -63,7 +74,7 @@
 //       const result = await declineBooking(bookingId)
 //       if (result.success) {
 //         toast.success(result.message || "Booking declined")
-//         await fetchBookings()
+//         await refreshData()
 //       } else {
 //         toast.error(result.message || "Failed to decline")
 //       }
@@ -80,7 +91,7 @@
 //       const result = await markInProgress(bookingId)
 //       if (result.success) {
 //         toast.success(result.message || "Job started")
-//         await fetchBookings()
+//         await refreshData()
 //       } else {
 //         toast.error(result.message || "Failed to start job")
 //       }
@@ -97,7 +108,7 @@
 //       const result = await markCompleted(bookingId)
 //       if (result.success) {
 //         toast.success(result.message || "Job completed")
-//         await fetchBookings()
+//         await refreshData()
 //       } else {
 //         toast.error(result.message || "Failed to complete")
 //       }
@@ -168,7 +179,7 @@
 //                 </thead>
 //                 <tbody>
 //                   {bookings.map((booking: any, index: number) => (
-//                     <tr key={booking.id} className="border-b border-border hover:bg-gray-50">
+//                     <tr key={`${booking.id}-${refreshKey}`} className="border-b border-border hover:bg-gray-50">
 //                       <td className="py-3 px-4 text-xs text-gray-400">{index + 1}</td>
 //                       <td className="py-3 px-4">{booking.customer?.name || "N/A"}</td>
 //                       <td className="py-3 px-4">{booking.service?.title || "N/A"}</td>
@@ -271,13 +282,11 @@
 //       </Card>
 //     </div>
 //   )
-
 // }
-
 
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { 
   getBookings, 
@@ -292,107 +301,66 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft, Loader2, CheckCircle, XCircle, PlayCircle, CheckCircle2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
-export default function TechnicianBookingsPage() {
+export default function TechnicianBookingsPage({ initialBookings = [] }: { initialBookings?: any[] }) {
   const router = useRouter()
-  const [bookings, setBookings] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [bookings, setBookings] = useState<any[]>(initialBookings)
+  const [loading, setLoading] = useState(false)
   const [processingId, setProcessingId] = useState<string | null>(null)
-  const [refreshKey, setRefreshKey] = useState(0) // ✅ Force Refresh
 
-  const fetchBookings = async () => {
-    setLoading(true)
-    try {
-      const result = await getBookings()
-      if (result.success) {
-        setBookings(result.data || [])
-      } else {
-        toast.error(result.message || "Failed to load bookings")
-      }
-    } catch (error) {
-      toast.error("Failed to load bookings")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // ✅ Effect trigger on refreshKey change
-  useEffect(() => {
-    fetchBookings()
-  }, [refreshKey])
-
-  // ✅ Common function for refresh
-  const refreshData = async () => {
-    router.refresh() // Next.js Router Refresh
-    setRefreshKey(prev => prev + 1) // Force Re-render
-    await fetchBookings() // Manual Fetch
-  }
-
-  const handleAccept = async (bookingId: string) => {
+  // ✅ Optimistic Update Handler
+  const handleStatusChange = async (bookingId: string, newStatus: string, action: () => Promise<any>) => {
     setProcessingId(bookingId)
+    
+    // ✅ 1. Find booking
+    const bookingIndex = bookings.findIndex(b => b.id === bookingId)
+    if (bookingIndex === -1) return
+
+    // ✅ 2. Store original for rollback
+    const originalBooking = bookings[bookingIndex]
+
+    // ✅ 3. Optimistic update - immediately change UI
+    const updatedBookings = [...bookings]
+    updatedBookings[bookingIndex] = { ...originalBooking, status: newStatus }
+    setBookings(updatedBookings)
+
     try {
-      const result = await acceptBooking(bookingId)
+      // ✅ 4. Call server action
+      const result = await action()
+
       if (result.success) {
-        toast.success(result.message || "Booking accepted")
-        await refreshData() // ✅ Refresh all
+        toast.success(result.message || "Updated successfully")
+        // ✅ 5. Hard refresh for safety
+        setTimeout(() => {
+          router.refresh()
+        }, 500)
       } else {
-        toast.error(result.message || "Failed to accept")
+        // ✅ 6. Rollback on error
+        setBookings(bookings)
+        toast.error(result.message || "Failed to update")
       }
     } catch (error) {
+      // ✅ 7. Rollback on catch
+      setBookings(bookings)
       toast.error("Something went wrong")
     } finally {
       setProcessingId(null)
     }
   }
 
-  const handleDecline = async (bookingId: string) => {
-    setProcessingId(bookingId)
-    try {
-      const result = await declineBooking(bookingId)
-      if (result.success) {
-        toast.success(result.message || "Booking declined")
-        await refreshData()
-      } else {
-        toast.error(result.message || "Failed to decline")
-      }
-    } catch (error) {
-      toast.error("Something went wrong")
-    } finally {
-      setProcessingId(null)
-    }
+  const handleAccept = (bookingId: string) => {
+    handleStatusChange(bookingId, "ACCEPTED", () => acceptBooking(bookingId))
   }
 
-  const handleStartJob = async (bookingId: string) => {
-    setProcessingId(bookingId)
-    try {
-      const result = await markInProgress(bookingId)
-      if (result.success) {
-        toast.success(result.message || "Job started")
-        await refreshData()
-      } else {
-        toast.error(result.message || "Failed to start job")
-      }
-    } catch (error) {
-      toast.error("Something went wrong")
-    } finally {
-      setProcessingId(null)
-    }
+  const handleDecline = (bookingId: string) => {
+    handleStatusChange(bookingId, "DECLINED", () => declineBooking(bookingId))
   }
 
-  const handleComplete = async (bookingId: string) => {
-    setProcessingId(bookingId)
-    try {
-      const result = await markCompleted(bookingId)
-      if (result.success) {
-        toast.success(result.message || "Job completed")
-        await refreshData()
-      } else {
-        toast.error(result.message || "Failed to complete")
-      }
-    } catch (error) {
-      toast.error("Something went wrong")
-    } finally {
-      setProcessingId(null)
-    }
+  const handleStartJob = (bookingId: string) => {
+    handleStatusChange(bookingId, "IN_PROGRESS", () => markInProgress(bookingId))
+  }
+
+  const handleComplete = (bookingId: string) => {
+    handleStatusChange(bookingId, "COMPLETED", () => markCompleted(bookingId))
   }
 
   const statusColors: Record<string, string> = {
@@ -419,7 +387,7 @@ export default function TechnicianBookingsPage() {
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={() => router.push("/technician_dashboard/dashboard")}
+          onClick={() => router.push("/technician_dashboard")}
           type="button"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
@@ -455,7 +423,7 @@ export default function TechnicianBookingsPage() {
                 </thead>
                 <tbody>
                   {bookings.map((booking: any, index: number) => (
-                    <tr key={`${booking.id}-${refreshKey}`} className="border-b border-border hover:bg-gray-50">
+                    <tr key={booking.id} className="border-b border-border hover:bg-gray-50">
                       <td className="py-3 px-4 text-xs text-gray-400">{index + 1}</td>
                       <td className="py-3 px-4">{booking.customer?.name || "N/A"}</td>
                       <td className="py-3 px-4">{booking.service?.title || "N/A"}</td>
@@ -470,13 +438,11 @@ export default function TechnicianBookingsPage() {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex gap-2 flex-wrap">
-                          {/* ✅ REQUESTED → Accept / Decline */}
                           {booking.status === 'REQUESTED' && (
                             <>
                               <Button
-                                type="button"
                                 size="sm"
-                                className="bg-green-600 hover:bg-green-700 text-white"
+                                className="bg-green-600 hover:bg-green-700"
                                 onClick={() => handleAccept(booking.id)}
                                 disabled={processingId === booking.id}
                               >
@@ -488,7 +454,6 @@ export default function TechnicianBookingsPage() {
                                 Accept
                               </Button>
                               <Button
-                                type="button"
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => handleDecline(booking.id)}
@@ -504,12 +469,10 @@ export default function TechnicianBookingsPage() {
                             </>
                           )}
 
-                          {/* ✅ PAID → Start Job */}
                           {booking.status === 'PAID' && (
                             <Button
-                              type="button"
                               size="sm"
-                              className="bg-purple-600 hover:bg-purple-700 text-white"
+                              className="bg-purple-600 hover:bg-purple-700"
                               onClick={() => handleStartJob(booking.id)}
                               disabled={processingId === booking.id}
                             >
@@ -522,12 +485,10 @@ export default function TechnicianBookingsPage() {
                             </Button>
                           )}
 
-                          {/* ✅ IN_PROGRESS → Complete */}
                           {booking.status === 'IN_PROGRESS' && (
                             <Button
-                              type="button"
                               size="sm"
-                              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                              className="bg-emerald-600 hover:bg-emerald-700"
                               onClick={() => handleComplete(booking.id)}
                               disabled={processingId === booking.id}
                             >
@@ -540,7 +501,6 @@ export default function TechnicianBookingsPage() {
                             </Button>
                           )}
 
-                          {/* ✅ COMPLETED → No Button */}
                           {booking.status === 'COMPLETED' && (
                             <Badge className="bg-emerald-100 text-emerald-800">
                               Completed ✅
