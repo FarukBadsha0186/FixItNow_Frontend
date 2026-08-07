@@ -11,7 +11,7 @@ export default async function AdminLayout({
 }) {
   const user = await getMe()
 
-  // ✅ Check if user is admin
+  //  Check if user is admin
   if (!user?.success || user?.data?.role !== "ADMIN") {
     redirect("/login")
   }

@@ -41,7 +41,7 @@ export default function BookingsPage() {
     loadBookings()
   }, [loadBookings])
 
-  // ✅ Refresh without loading state
+  
   const refreshBookings = useCallback(async () => {
     try {
       const result = await getBookings()
@@ -54,7 +54,7 @@ export default function BookingsPage() {
     router.refresh()
   }, [router])
 
-  // ✅ Accept Booking
+  
   const handleAccept = async (bookingId: string) => {
     setProcessingId(bookingId)
     try {
@@ -76,7 +76,7 @@ export default function BookingsPage() {
     }
   }
 
-  // ✅ Decline Booking
+ 
   const handleDecline = async (bookingId: string) => {
     setProcessingId(bookingId)
     try {
@@ -98,7 +98,7 @@ export default function BookingsPage() {
     }
   }
 
-  // ✅ Start Job
+  // Start Job
   const handleStartJob = async (bookingId: string) => {
     setProcessingId(bookingId)
     try {
@@ -120,7 +120,7 @@ export default function BookingsPage() {
     }
   }
 
-  // ✅ Complete Job
+  //  Complete Job
   const handleComplete = async (bookingId: string) => {
     setProcessingId(bookingId)
     try {

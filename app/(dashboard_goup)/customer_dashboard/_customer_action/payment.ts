@@ -4,7 +4,7 @@
 import { cookies } from "next/headers"
 import { revalidatePath } from "next/cache"
 
-// ✅ Get Token
+//  Get Token
 const getToken = async () => {
   const cookieStore = await cookies()
   return cookieStore.get("accessToken")?.value
@@ -23,8 +23,8 @@ export async function createPayment(bookingId: string) {
       return { success: false, message: "Unauthorized - Please log in" }
     }
 
-    console.log("📌 Token exists:", !!token)
-    console.log("📌 Creating payment for:", bookingId)
+    console.log(" Token exists:", !!token)
+    console.log(" Creating payment for:", bookingId)
 
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/payments/create`,
@@ -131,7 +131,7 @@ export async function getPayments() {
       `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/payments`,
       {
         headers: {
-          "Authorization": `Bearer ${token}`,  // ✅ Token আছে
+          "Authorization": `Bearer ${token}`,  
           "Content-Type": "application/json",
         },
         cache: "no-store",
@@ -149,75 +149,10 @@ export async function getPayments() {
 
 
 
-// export async function confirmPayment(paymentId: string) {
-//   try {
-//     if (!paymentId) {
-//       return { success: false, message: "Payment ID is required" }
-//     }
-
-//     const token = await getToken()
-//     if (!token) {
-//       return { success: false, message: "Unauthorized - Please log in" }
-//     }
-
-//     console.log("📌 Confirming payment:", paymentId)
-
-//     const res = await fetch(
-//       `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/payments/confirm`,
-//       {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           "Authorization": `Bearer ${token}`,
-//         },
-//         body: JSON.stringify({ paymentId }),
-//       }
-//     )
-
-//     const result = await res.json()
-//     console.log("🔍 Confirm Payment Response:", result)
-
-//     if (!res.ok) {
-//       return { 
-//         success: false, 
-//         message: result.message || "Payment confirmation failed" 
-//       }
-//     }
-
-    
-//     revalidatePath("/")
-//     revalidatePath("/customer_dashboard")
-//     revalidatePath("/customer_dashboard/bookings")
-//     revalidatePath("/customer_dashboard/payments")
-    
-    
-//     revalidatePath("/technician_dashboard")
-//     revalidatePath("/technician_dashboard/bookings")
-    
-  
-//     revalidatePath("/admin_dashboard")
-//     revalidatePath("/admin_dashboard/bookings")
-
-//     console.log("✅ All paths revalidated")
-
-//     return {
-//       success: true,
-//       data: result.data,
-//       message: "Payment confirmed successfully",
-//     }
-
-//   } catch (error) {
-//     console.error("Error confirming payment:", error)
-//     return { 
-//       success: false, 
-//       message: "Something went wrong. Please try again." 
-//     }
-//   }
-// }
 
 
 
-// ✅ Correct - expects sessionId
+
 export async function confirmPayment(sessionId: string) {
   if (!sessionId) {
     return { success: false, message: "Session ID is required" }
@@ -238,7 +173,7 @@ export async function confirmPayment(sessionId: string) {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ sessionId }),  // ✅ Fixed!
+      body: JSON.stringify({ sessionId }),  
     }
   )
 
@@ -252,7 +187,7 @@ export async function confirmPayment(sessionId: string) {
     }
   }
 
-  // ✅ Revalidate all paths
+  //  Revalidate all paths
   revalidatePath("/")
   revalidatePath("/customer_dashboard")
   revalidatePath("/customer_dashboard/bookings")
@@ -262,7 +197,7 @@ export async function confirmPayment(sessionId: string) {
   revalidatePath("/admin_dashboard")
   revalidatePath("/admin_dashboard/bookings")
 
-  console.log("✅ All paths revalidated")
+  console.log(" All paths revalidated")
 
   return {
     success: true,

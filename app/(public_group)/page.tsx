@@ -21,7 +21,7 @@ export default function HomePage() {
     const fetchData = async () => {
       setLoading(true)
       try {
-        // ✅ FIXED: Pass object with search property
+        
         const [servicesRes, techniciansRes] = await Promise.all([
           getServices({ search: searchTerm || undefined }),
           getTechnicians({ search: searchTerm || undefined })
@@ -53,21 +53,7 @@ export default function HomePage() {
             Book verified technicians for plumbing, electrical, cleaning & more
           </p>
           
-          {/* <div className="max-w-2xl mx-auto flex gap-2 bg-white rounded-lg p-2">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-800 w-5 h-5" />
-              <Input
-                type="text "
-                placeholder="Search services or technicians..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="pl-10 border-0 focus-visible:ring-0 text-black"
-              />
-            </div>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
-              Search
-            </Button>
-          </div> */}
+          
         </div>
       </section>
 
@@ -174,7 +160,7 @@ export default function HomePage() {
   )
 }
 
-// ✅ Technician Card Component
+
 function TechnicianCard({ technician }: { technician: any }) {
   return (
     <Link href={`/technicians/${technician.id}`}>

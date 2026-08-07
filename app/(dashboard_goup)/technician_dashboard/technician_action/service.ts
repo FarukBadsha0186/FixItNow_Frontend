@@ -3,9 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 
-// ============================================
-// Types
-// ============================================
+
 
 export interface Service {
   id: string
@@ -44,9 +42,7 @@ export interface CategoriesResponse {
   message?: string
 }
 
-// ============================================
-// ✅ Helper Functions
-// ============================================
+
 
 const getToken = async (): Promise<string | null> => {
   const cookieStore = await cookies()
@@ -66,9 +62,6 @@ const checkAuth = async (): Promise<{ success: boolean; message?: string }> => {
   return { success: true }
 }
 
-// ============================================
-// 1️⃣ GET ALL SERVICES
-// ============================================
 
 export async function getServices(): Promise<ServiceResponse> {
   try {
@@ -92,7 +85,7 @@ export async function getServices(): Promise<ServiceResponse> {
       }
     )
 
-    // ✅ Handle 401
+    //  Handle 401
     if (response.status === 401) {
       return {
         success: false,
@@ -123,13 +116,11 @@ export async function getServices(): Promise<ServiceResponse> {
   }
 }
 
-// ============================================
-// 2️⃣ GET SINGLE SERVICE
-// ============================================
+
 
 export async function getService(serviceId: string): Promise<ServiceActionResponse> {
   try {
-    // ✅ Check authentication
+    //  Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }
@@ -186,9 +177,7 @@ export async function getService(serviceId: string): Promise<ServiceActionRespon
   }
 }
 
-// ============================================
-// 3️⃣ CREATE SERVICE
-// ============================================
+
 
 export async function createService(data: {
   title: string
@@ -197,13 +186,13 @@ export async function createService(data: {
   categoryId: string
 }): Promise<ServiceActionResponse> {
   try {
-    // ✅ Check authentication
+    //  Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }
     }
 
-    // ✅ Validate input
+    //  Validate input
     if (!data.title || data.title.trim().length === 0) {
       return {
         success: false,
@@ -267,7 +256,7 @@ export async function createService(data: {
       }
     }
 
-    // ✅ Revalidate paths
+    //  Revalidate paths
     revalidatePath("/technician/services")
     revalidatePath("/technician/dashboard")
 
@@ -286,9 +275,7 @@ export async function createService(data: {
   }
 }
 
-// ============================================
-// 4️⃣ UPDATE SERVICE
-// ============================================
+
 
 export async function updateService(
   serviceId: string,
@@ -300,7 +287,7 @@ export async function updateService(
   }
 ): Promise<ServiceActionResponse> {
   try {
-    // ✅ Check authentication
+    //  Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }
@@ -313,7 +300,7 @@ export async function updateService(
       }
     }
 
-    // ✅ Validate input
+    // Validate input
     if (data.title !== undefined && data.title.trim().length === 0) {
       return {
         success: false,
@@ -376,16 +363,13 @@ export async function updateService(
   }
 }
 
-// ============================================
-// 5️⃣ DELETE SERVICE
-// ============================================
 
 export async function deleteService(serviceId: string): Promise<{
   success: boolean
   message?: string
 }> {
   try {
-    // ✅ Check authentication
+    //  Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }
@@ -444,9 +428,7 @@ export async function deleteService(serviceId: string): Promise<{
   }
 }
 
-// ============================================
-// 6️⃣ GET ALL CATEGORIES
-// ============================================
+
 
 export async function getCategories(): Promise<CategoriesResponse> {
   try {
@@ -497,9 +479,7 @@ export async function getCategories(): Promise<CategoriesResponse> {
   }
 }
 
-// ============================================
-// 7️⃣ GET SERVICE STATS (for Dashboard)
-// ============================================
+
 
 export async function getServiceStats(): Promise<{
   success: boolean
@@ -510,7 +490,7 @@ export async function getServiceStats(): Promise<{
   message?: string
 }> {
   try {
-    // ✅ Check authentication
+    //  Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }

@@ -9,7 +9,7 @@ import {
   deleteService,
   updateService ,
   Service, Category 
-} from '../../technician_dashboard/technician_action/service'  // ✅ Path: ../../_actions/
+} from '../../technician_dashboard/technician_action/service' 
 import { toast } from 'sonner'
 
 

@@ -22,6 +22,7 @@ interface BookingHistoryProps {
   isLoading?: boolean
 }
 
+//  Status Colors
 const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
   REQUESTED: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Requested' },
   ACCEPTED: { bg: 'bg-blue-100', text: 'text-blue-800', label: 'Accepted' },
@@ -73,8 +74,15 @@ export function BookingHistory({ bookings, onCancel, isLoading = false }: Bookin
 
   if (!bookings || bookings.length === 0) {
     return (
-      <div className="text-center py-8 text-muted-foreground">
-        No bookings found.
+      <div className="text-center py-12">
+        <div className="text-4xl mb-4">📋</div>
+        <p className="text-lg font-medium text-foreground">No bookings found</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          You haven't made any bookings yet
+        </p>
+        <Link href="/services">
+          <Button className="mt-4">Browse Services</Button>
+        </Link>
       </div>
     )
   }
@@ -84,6 +92,7 @@ export function BookingHistory({ bookings, onCancel, isLoading = false }: Bookin
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border">
+            <th className="text-left py-3 px-4 font-medium">#</th>
             <th className="text-left py-3 px-4 font-medium">Service</th>
             <th className="text-left py-3 px-4 font-medium">Technician</th>
             <th className="text-left py-3 px-4 font-medium">Date</th>
@@ -93,13 +102,13 @@ export function BookingHistory({ bookings, onCancel, isLoading = false }: Bookin
           </tr>
         </thead>
         <tbody>
-          {bookings.map((booking) => (
+          {bookings.map((booking, index) => (
             <tr key={booking.id} className="border-b border-border hover:bg-muted/50">
+              <td className="py-3 px-4 text-xs text-gray-400">{index + 1}</td>
               <td className="py-3 px-4">{booking.service?.title || 'N/A'}</td>
               <td className="py-3 px-4">
                 <div className="flex items-center gap-2">
                   <span>{booking.technician?.name || 'N/A'}</span>
-                  {/* ✅ Technician Availability Badge */}
                   {booking.technician?.isAvailable === false && (
                     <Badge variant="outline" className="text-red-500 border-red-200 text-xs">
                       Unavailable
@@ -114,7 +123,7 @@ export function BookingHistory({ bookings, onCancel, isLoading = false }: Bookin
               </td>
               <td className="py-3 px-4">
                 <div className="flex flex-wrap gap-2">
-                  {/* Pay Now Button */}
+                  {/* ✅ Pay Now - ACCEPTED */}
                   {booking.status === 'ACCEPTED' && (
                     <Link href={`/customer_dashboard/bookings/${booking.id}/pay`}>
                       <Button size="sm" className="bg-green-600 hover:bg-green-700">
@@ -123,7 +132,7 @@ export function BookingHistory({ bookings, onCancel, isLoading = false }: Bookin
                     </Link>
                   )}
 
-                  {/* Cancel Button */}
+                  {/*  Cancel - REQUESTED or ACCEPTED */}
                   {canCancel(booking.status) && (
                     <Button
                       variant="outline"
@@ -140,7 +149,7 @@ export function BookingHistory({ bookings, onCancel, isLoading = false }: Bookin
                     </Button>
                   )}
 
-                  {/* Review Button */}
+                  {/*  Review - COMPLETED */}
                   {booking.status === 'COMPLETED' && (
                     <Link href={`/customer_dashboard/reviews?bookingId=${booking.id}`}>
                       <Button size="sm" variant="default">

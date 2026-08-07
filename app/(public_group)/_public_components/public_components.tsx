@@ -77,9 +77,7 @@ export function SearchBar({
   )
 }
 
-// ============================================
-// 2️⃣ ADVANCED FILTERS
-// ============================================
+
 export function AdvancedFilters({ 
   categories, 
   onFilterChange,
@@ -205,9 +203,7 @@ export function AdvancedFilters({
   )
 }
 
-// ============================================
-// 3️⃣ SERVICE CARD
-// ============================================
+
 export function ServiceCard({ service }: { service: any }) {
   const tech = service.technician
   const name = tech?.user?.name || "Unknown"
@@ -481,7 +477,7 @@ export function TechnicianProfile({
 
               <div className="mt-4">
                 {isAvailable ? (
-                  <Link href={isLoggedIn ? `/booking/${technician.id}` : "#"}>
+                  <Link href={isLoggedIn ? `/customer_dashboard/booking/${technician.id}` : "#"}>
                     <Button className="w-full md:w-auto" onClick={handleBookNow}>
                       {isLoggedIn ? "Book Now" : "Login to Book"}
                     </Button>
@@ -564,9 +560,7 @@ export function TechnicianProfile({
   )
 }
 
-// ============================================
-// 8️⃣ MAIN HOME PAGE (with all features)
-// ============================================
+
 export function HomePage({
   initialServices = [],
   initialTechnicians = [],

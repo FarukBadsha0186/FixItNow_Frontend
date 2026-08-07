@@ -9,9 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Loader2, CreditCard, Lock, Search } from "lucide-react"  
 import { toast } from "sonner"
 
-// ============================================
-// 1️⃣ PAYMENT FORM (Already exists)
-// ============================================
+
 interface PaymentFormProps {
   bookingId: string
   amount: number
@@ -106,9 +104,7 @@ export function PaymentForm({
   )
 }
 
-// ============================================
-// 2️⃣ PAYMENT HISTORY (NEW - ADD THIS!)
-// ============================================
+
 interface Payment {
   id: string
   bookingId: string

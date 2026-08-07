@@ -97,7 +97,7 @@ export function DashboardOverview({
     }
   }
 
-  // ✅ Handle Accept
+  //  Handle Accept
   const handleAccept = async (bookingId: string) => {
     setProcessingId(bookingId)
     try {
@@ -120,7 +120,7 @@ export function DashboardOverview({
     }
   }
 
-  // ✅ Handle Decline
+  // Handle Decline
   const handleDecline = async (bookingId: string) => {
     setProcessingId(bookingId)
     try {
@@ -143,7 +143,7 @@ export function DashboardOverview({
     }
   }
 
-  // ✅ Handle Start Job (PAID → IN_PROGRESS)
+  //  Handle Start Job (PAID → IN_PROGRESS)
   const handleStartJob = async (bookingId: string) => {
     setProcessingId(bookingId)
     try {
@@ -166,7 +166,7 @@ export function DashboardOverview({
     }
   }
 
-  // ✅ Handle Complete (IN_PROGRESS → COMPLETED)
+  //  Handle Complete (IN_PROGRESS → COMPLETED)
   const handleComplete = async (bookingId: string) => {
     setProcessingId(bookingId)
     try {

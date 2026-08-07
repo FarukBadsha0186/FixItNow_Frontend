@@ -31,7 +31,7 @@ export function AvailabilityPage({ currentSlots, onSave, isLoading = false }: Av
     })
   })
 
-  // ✅ Sync when currentSlots changes
+  //  Sync when currentSlots changes
   useEffect(() => {
     setDaySlots((prev) =>
       DAYS.map((_, index) => {
@@ -63,7 +63,7 @@ export function AvailabilityPage({ currentSlots, onSave, isLoading = false }: Av
   }
 
   const handleSave = async () => {
-    // ✅ Validate
+    //  Validate
     const invalidSlots = daySlots.filter(
       (day) => day.enabled && day.startTime >= day.endTime
     )

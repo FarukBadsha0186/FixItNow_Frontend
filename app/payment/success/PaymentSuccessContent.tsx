@@ -1,3 +1,5 @@
+
+
 "use client"
 
 import { useEffect, useState } from 'react'
@@ -15,6 +17,34 @@ export default function PaymentSuccessContent() {
   const [loading, setLoading] = useState(true)
   const [paymentData, setPaymentData] = useState<{ bookingId: string; amount: number } | null>(null)
   const [confirmed, setConfirmed] = useState(false)
+  const [userRole, setUserRole] = useState<string>("CUSTOMER")
+  const [redirectPath, setRedirectPath] = useState<string>("/customer_dashboard")
+
+  // ✅ Get user role on mount
+  useEffect(() => {
+    const getUserRole = async () => {
+      try {
+        const res = await fetch("/api/auth/me")
+        const data = await res.json()
+        if (data.success) {
+          const role = data.data?.role || "CUSTOMER"
+          setUserRole(role)
+          
+          if (role === "TECHNICIAN") {
+            setRedirectPath("/technician_dashboard")
+          } else if (role === "ADMIN") {
+            setRedirectPath("/admin_dashboard")
+          } else {
+            setRedirectPath("/customer_dashboard")
+          }
+          console.log("👤 User Role:", role, "→ Redirect:", redirectPath)
+        }
+      } catch (error) {
+        console.error("Error fetching user role:", error)
+      }
+    }
+    getUserRole()
+  }, [])
 
   useEffect(() => {
     const bookingId = searchParams.get('bookingId')
@@ -30,16 +60,23 @@ export default function PaymentSuccessContent() {
     if (sessionId) {
       const confirm = async () => {
         try {
+          
           const result = await confirmPayment(sessionId)
+          console.log("📦 Confirm result:", result)
+          
           if (result.success) {
             setConfirmed(true)
-            toast.success("Payment confirmed! 🎉")
-            setTimeout(() => router.push('/customer_dashboard'), 2000)
+            toast.success("Payment confirmed! ")
+            
+            setTimeout(() => {
+              router.push(redirectPath)
+            }, 2000)
           } else {
             toast.error(result.message || "Payment confirmation failed")
             setLoading(false)
           }
         } catch (error) {
+          console.error("❌ Confirm error:", error)
           toast.error("Something went wrong")
           setLoading(false)
         }
@@ -48,13 +85,13 @@ export default function PaymentSuccessContent() {
     } else {
       setLoading(false)
     }
+  }, [searchParams, router, redirectPath])
 
-    const timer = setTimeout(() => {
-      if (!confirmed) router.push('/customer_dashboard')
-    }, 8000)
-
-    return () => clearTimeout(timer)
-  }, [searchParams, router, confirmed])
+  const getDashboardLink = () => {
+    if (userRole === "TECHNICIAN") return '/technician_dashboard'
+    if (userRole === "ADMIN") return '/admin_dashboard'
+    return '/customer_dashboard'
+  }
 
   if (loading) {
     return (
@@ -74,7 +111,7 @@ export default function PaymentSuccessContent() {
               <CheckCircle className="h-12 w-12 text-green-600" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Payment Successful! 🎉</CardTitle>
+          <CardTitle className="text-2xl">Payment Successful! </CardTitle>
           <CardDescription>Your payment has been processed successfully.</CardDescription>
         </CardHeader>
 
@@ -94,7 +131,7 @@ export default function PaymentSuccessContent() {
 
           {confirmed && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <p className="text-sm text-green-700">✅ Payment confirmed! Redirecting...</p>
+              <p className="text-sm text-green-700"> Payment confirmed! Redirecting...</p>
             </div>
           )}
 
@@ -104,7 +141,7 @@ export default function PaymentSuccessContent() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-3">
-          <Link href="/customer_dashboard" className="w-full">
+          <Link href={getDashboardLink()} className="w-full">
             <Button className="w-full">Go to Dashboard</Button>
           </Link>
           <Link href="/services" className="w-full">
