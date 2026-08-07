@@ -1,17 +1,11 @@
-// app/(auth_group)/_auth_action/auth_action.ts
 
 "use server";
-
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-// ============================================
-// ✅ FIXED: LoginState Type
-// ============================================
-
 export type LoginState = {
-    success: boolean;  // ✅ true/false both
+    success: boolean; 
     statusCode?: number;
     message: string;
     data?: {
@@ -20,20 +14,18 @@ export type LoginState = {
     };
 };
 
-// ============================================
-// ✅ FIXED: Login Action
-// ============================================
+
 
 export const loginAction = async (
-    prevState: LoginState,  // ✅ redirectTo সরিয়ে দিয়েছি
+    prevState: LoginState,
     formData: FormData
 ): Promise<LoginState> => {
     try {
-        // ✅ FIXED: Email/Password Type
+    
         const email = formData.get("email")?.toString() || "";
         const password = formData.get("password")?.toString() || "";
 
-        // ✅ Validation
+    
         if (!email || !password) {
             return {
                 success: false,
@@ -44,7 +36,6 @@ export const loginAction = async (
 
         console.log("🔍 Sending Login Request:", { email });
 
-        // ✅ FIXED: Environment Variable
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/auth/login`, {
             method: "POST",
             headers: {
@@ -56,7 +47,6 @@ export const loginAction = async (
         const result = await res.json();
         console.log("📦 Login Response:", JSON.stringify(result, null, 2));
 
-        // ✅ FIXED: Error Handling
         if (!result.success) {
             return {
                 success: false,
@@ -65,7 +55,6 @@ export const loginAction = async (
             };
         }
 
-        // ✅ Get Tokens
         const accessToken = result?.data?.accessToken;
         const refreshToken = result?.data?.refreshToken;
 
@@ -77,7 +66,7 @@ export const loginAction = async (
             };
         }
 
-        // ✅ FIXED: Cookies Set (Secure added)
+        
         const cookieStore = await cookies();
 
         cookieStore.set("accessToken", accessToken, {
@@ -117,21 +106,11 @@ export const loginAction = async (
             redirect("/customer_dashboard");
         }
 
-        // ✅ This won't execute
-        return {
-            success: true,
-            statusCode: 200,
-            message: result.message || "Login successful",
-            data: {
-                accessToken,
-                refreshToken,
-            },
-        };
+      
 
     } catch (error) {
         console.error("Login error:", error);
 
-        // ✅ Handle redirect error
         if (error instanceof Error && error.message.includes("NEXT_REDIRECT")) {
             throw error;
         }
@@ -144,9 +123,7 @@ export const loginAction = async (
     }
 };
 
-// ============================================
-// REGISTER (আপনার Code এ যোগ করেছি)
-// ============================================
+
 
 export type RegisterState = {
     success: boolean;
@@ -172,7 +149,7 @@ export async function registerUser(
         };
 
         const response = await fetch(
-            `${process.env.BACKEND_API_URL}/api/auth/register`,
+            `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/auth/register`,
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

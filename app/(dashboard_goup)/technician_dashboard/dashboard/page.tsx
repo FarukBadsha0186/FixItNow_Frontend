@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { DashboardOverview } from '../../technician_dashboard/technician_components/_dasboard'
 import { getDashboardData } from '../../technician_dashboard/technician_action/dashboard'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 
-// ✅ Define type for dashboard data
 interface DashboardData {
   profile: any
   stats: {
@@ -18,30 +18,28 @@ interface DashboardData {
 }
 
 export default function TechnicianDashboardPage() {
-  // ✅ Add proper type: DashboardData | null
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
-
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true)
+      setError(null)
       try {
         const result = await getDashboardData()
-        if (result.success) {
-          // ✅ Use nullish coalescing to handle undefined
-          setData(result.data ?? null)
+        console.log("📊 Dashboard result:", result)
+        
+        if (result.success && result.data) {
+          setData(result.data)
         } else {
+          setError(result.message || 'Failed to load dashboard')
           toast.error(result.message || 'Failed to load dashboard')
-          setData(null)
         }
       } catch (error) {
-        toast.error('Failed to load dashboard')
-        setData(null)
+        const msg = error instanceof Error ? error.message : 'Something went wrong'
+        setError(msg)
+        toast.error(msg)
       } finally {
         setLoading(false)
       }
@@ -52,8 +50,23 @@ export default function TechnicianDashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <div className="text-red-500 text-lg font-semibold">⚠️ Error</div>
+        <p className="text-muted-foreground mt-2">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-primary text-white rounded-md"
+        >
+          Retry
+        </button>
       </div>
     )
   }

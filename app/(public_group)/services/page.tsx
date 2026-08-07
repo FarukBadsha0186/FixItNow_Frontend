@@ -14,6 +14,7 @@ interface FilterState {
   rating: string
   priceRange: string
   category: string
+  
 }
 
 export default function ServicesPage() {
@@ -26,6 +27,8 @@ export default function ServicesPage() {
     rating: 'all',
     priceRange: 'all',
     category: 'all',
+     
+
   })
 
   const fetchData = async () => {
@@ -80,7 +83,7 @@ export default function ServicesPage() {
         <AdvancedFilters 
           categories={categories} 
           onFilterChange={handleFilterChange}
-          initialFilters={filters}
+        
         />
       </div>
 
