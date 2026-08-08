@@ -85,9 +85,9 @@ export const loginAction = async (
             path: "/",
         });
 
-        console.log("✅ Cookies Set Successfully");
+        console.log(" Cookies Set Successfully");
 
-        // ✅ Decode Token
+        //  Decode Token
         const decodedToken = jwt.decode(accessToken) as JwtPayload;
         console.log("👤 Decoded Token:", decodedToken);
 
