@@ -280,7 +280,7 @@ export async function middleware(request: NextRequest) {  // ✅ async যোগ
           response.cookies.set('accessToken', refreshData.data.accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 60 * 60 * 24,
+          //  maxAge: 60 * 60 * 24,
             sameSite: "lax",
             path: "/"
           });

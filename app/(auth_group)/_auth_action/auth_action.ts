@@ -72,7 +72,7 @@ export const loginAction = async (
         cookieStore.set("accessToken", accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 60 * 60 * 24, // 1 day
+         //   maxAge: 60 * 60 * 24, // 1 day
             sameSite: "lax",
             path: "/",
         });
@@ -80,7 +80,7 @@ export const loginAction = async (
         cookieStore.set("refreshToken", refreshToken || "", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            maxAge: 60 * 60 * 24 * 7, // 7 days
+           // maxAge: 60 * 60 * 24 * 7, // 7 days
             sameSite: "lax",
             path: "/",
         });
