@@ -26,8 +26,13 @@ export default function HomePage() {
           getServices({ search: searchTerm || undefined }),
           getTechnicians({ search: searchTerm || undefined })
         ])
-        setServices(servicesRes?.data?.slice(0, 8) || [])
+        // setServices(servicesRes?.data?.slice(0, 8) || [])
+        // setTechnicians(techniciansRes?.data?.slice(0, 6) || [])
+         setServices(servicesRes?.data?.services?.slice(0, 8) || [])
         setTechnicians(techniciansRes?.data?.slice(0, 6) || [])
+
+        setServices(servicesRes?.data?.categories?.slice(0, 8) || [])
+      setTechnicians(techniciansRes?.data?.slice(0, 6) || [])
       } catch (error) {
         toast.error("Failed to load data")
       } finally {
@@ -149,7 +154,7 @@ export default function HomePage() {
               </Button>
             </Link>
             <Link href="/services">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-indigo-700">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-black hover:bg-indigo-700">
                 Browse Services
               </Button>
             </Link>

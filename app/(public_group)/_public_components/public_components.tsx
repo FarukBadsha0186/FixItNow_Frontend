@@ -136,7 +136,8 @@ export function AdvancedFilters({
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 {categories?.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                //  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -204,60 +205,29 @@ export function AdvancedFilters({
 }
 
 
-export function ServiceCard({ service }: { service: any }) {
-  const tech = service.technician
-  const name = tech?.user?.name || "Unknown"
-  const rating = tech?.avgRating || 0
-  const location = tech?.location || "N/A"
-  const image = tech?.user?.image || null
+
+export function ServiceCard({ service }: { service: string }) {
+  const categoryName = service || "Unknown"  // service is now just a string like "Electrical"
 
   return (
-    <Link href={`/technicians/${tech?.id}`}>
+    <Link href={`/services?category=${categoryName}`}>
       <Card className="overflow-hidden hover:shadow-lg transition cursor-pointer group h-full">
-        <div className="relative h-48 w-full bg-gray-100">
-          {service.image ? (
-            <Image src={service.image} alt={service.title} fill className="object-cover group-hover:scale-105 transition duration-300" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-4xl text-gray-400 bg-gradient-to-br from-gray-50 to-gray-200">🔧</div>
-          )}
-          <Badge className="absolute bottom-2 right-2 bg-indigo-600 hover:bg-indigo-700">${service.price}</Badge>
+        <div className="relative h-48 w-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center">
+          <div className="text-6xl">🔧</div>
         </div>
 
         <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <CardTitle className="text-lg line-clamp-1">{service.title}</CardTitle>
-            <Badge variant="secondary" className="flex items-center gap-1">
-              <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-              {rating.toFixed(1)}
-            </Badge>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg line-clamp-1">{categoryName}</CardTitle>
           </div>
         </CardHeader>
 
         <CardContent className="pb-2 space-y-2">
-          <div className="flex items-center gap-2">
-            <Avatar className="w-6 h-6">
-              <AvatarImage src={image || undefined} />
-              <AvatarFallback className="text-xs">{name.charAt(0) || "?"}</AvatarFallback>
-            </Avatar>
-            <span className="text-sm text-gray-600">{name}</span>
-          </div>
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center gap-1">
-              <MapPin className="w-4 h-4" />
-              <span>{location}</span>
-            </div>
-            <div className="flex items-center gap-1 font-semibold text-indigo-600">
-              <Clock className="w-4 h-4" />
-              <span>${service.price}</span>
-            </div>
-          </div>
-          {service.category && (
-            <Badge variant="outline" className="text-xs">{service.category.name}</Badge>
-          )}
+          <p className="text-sm text-gray-500">Browse all services in this category</p>
         </CardContent>
 
         <CardFooter>
-          <Button className="w-full">View Profile</Button>
+          <Button className="w-full">View Services</Button>
         </CardFooter>
       </Card>
     </Link>

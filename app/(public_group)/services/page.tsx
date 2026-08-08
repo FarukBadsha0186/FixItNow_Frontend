@@ -1,12 +1,9 @@
 
-
-
 "use client"
 
 import { useState, useEffect } from 'react'
-import { getServices, getCategories } from '../../(public_group)/_public_action/action'
-// ✅ Correct import
-import { ServiceGrid, SearchBar, AdvancedFilters } from '../../(public_group)/_public_components/public_components'
+import { getCategories } from '../../(public_group)/_public_action/action'
+import { SearchBar, AdvancedFilters } from '../../(public_group)/_public_components/public_components'
 import { toast } from 'sonner'
 
 interface FilterState {
@@ -14,41 +11,25 @@ interface FilterState {
   rating: string
   priceRange: string
   category: string
-  
 }
 
 export default function ServicesPage() {
-  const [services, setServices] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
   const [filters, setFilters] = useState<FilterState>({
     location: 'all',
     rating: 'all',
     priceRange: 'all',
     category: 'all',
-     
-
   })
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [servicesData, categoriesData] = await Promise.all([
-        getServices({
-          search: searchTerm || undefined,
-          category: filters.category !== 'all' ? filters.category : undefined,
-          location: filters.location !== 'all' ? filters.location : undefined,
-          rating: filters.rating !== 'all' ? filters.rating : undefined,
-          priceRange: filters.priceRange !== 'all' ? filters.priceRange : undefined,
-        }),
-        getCategories(),
-      ])
-
-      setServices(servicesData?.data || [])
+      const categoriesData = await getCategories()
       setCategories(categoriesData?.data || [])
     } catch (error) {
-      toast.error('Failed to load services')
+      toast.error('Failed to load categories')
     } finally {
       setLoading(false)
     }
@@ -56,11 +37,7 @@ export default function ServicesPage() {
 
   useEffect(() => {
     fetchData()
-  }, [searchTerm, filters])
-
-  const handleSearch = (term: string) => {
-    setSearchTerm(term)
-  }
+  }, [])
 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters)
@@ -69,30 +46,32 @@ export default function ServicesPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-foreground">All Services</h1>
+        <h1 className="text-3xl font-bold text-foreground">Services by Category</h1>
         <p className="text-muted-foreground mt-2">
-          Browse our services and book trusted professionals
+          Browse our services by category
         </p>
       </div>
 
-      {/* Search & Filters */}
+      {/* Filters */}
       <div className="mb-6 space-y-4">
-        <div className="flex flex-col md:flex-row gap-4">
-          <SearchBar onSearch={handleSearch} placeholder="Search services..." className="flex-1" />
-        </div>
         <AdvancedFilters 
           categories={categories} 
           onFilterChange={handleFilterChange}
-        
         />
       </div>
 
-      {/* Results Count */}
-      <div className="text-sm text-muted-foreground mb-4">
-        Showing {services.length} services
-      </div>
-
-      <ServiceGrid services={services} isLoading={loading} />
+      {/* Categories List */}
+      {loading ? (
+        <div className="text-center py-12">Loading...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {categories?.map((category) => (
+            <div key={category} className="p-4 border rounded-lg hover:shadow-lg transition">
+              <h3 className="text-lg font-semibold">{category}</h3>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
