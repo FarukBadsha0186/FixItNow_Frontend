@@ -267,7 +267,7 @@ export function ServiceGrid({ services, isLoading = false }: { services: any[]; 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {services.map((service) => (
-        <ServiceCard key={service.id} service={service} />
+        <ServiceCard key={service} service={service} />
       ))}
     </div>
   )
@@ -618,3 +618,8 @@ export function HomePage({
     </div>
   )
 }
+
+
+// {services.map((service, index) => (
+//   <ServiceCard key={index} service={service} />
+// ))}

@@ -25,8 +25,7 @@ const LoginForm = () => {
 
         if (state.success) {
             toast.success(state.message || "Login Successful");
-            // ✅ Redirect handled by server (redirect() function)
-            // No need for client-side redirect
+           
         }
 
         if (!state.success && state.message) {

@@ -34,7 +34,7 @@ export default function AvailabilityRoute() {
     const result = await updateAvailability(slots)
     if (result.success) {
       toast.success(result.message)
-      await fetchAvailability() // ✅ Refresh after save
+      await fetchAvailability() 
     } else {
       toast.error(result.message)
     }

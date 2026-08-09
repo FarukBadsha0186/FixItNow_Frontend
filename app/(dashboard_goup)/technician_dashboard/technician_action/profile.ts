@@ -8,16 +8,16 @@ const getToken = async () => {
   return cookieStore.get("accessToken")?.value
 }
 
-// ✅ GET Profile (with photo + availability)
+//  GET Profile (with photo + availability)
 
 
-// ✅ UPDATE Profile (with photo)
+//  UPDATE Profile (with photo)
 export async function updateProfile(data: {
   bio?: string
   experience?: number
   hourlyRate?: number
   location?: string
-  profilePicture?: string  // ✅ Photo add
+  profilePicture?: string  //  Photo add
 }) {
   try {
     const token = await getToken()
@@ -58,7 +58,7 @@ export async function updateProfile(data: {
 
 
 
-// ✅ GET Profile (using /api/auth/me + bookings)
+//  GET Profile (using /api/auth/me + bookings)
 export async function getProfile() {
   try {
     const token = await getToken()

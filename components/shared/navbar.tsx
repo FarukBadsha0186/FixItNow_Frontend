@@ -50,7 +50,7 @@ const roleNavItems: Record<string, { label: string; href: string }[]> = {
   TECHNICIAN: [
     { label: 'My Services', href: '/technician_dashboard/service' },
     { label: 'Availability', href: '/technician_dashboard/availability' },
-    { label: 'Bookings', href: '/technician_dashboard/booking' },
+    { label: 'Bookings', href: '/technician_dashboard/bookings' },
   ],
   ADMIN: [
     { label: 'Users', href: '/admin_dashboard/users' },

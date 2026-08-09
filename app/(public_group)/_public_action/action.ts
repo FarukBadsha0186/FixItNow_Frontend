@@ -124,7 +124,7 @@ export async function getServices(filters?: {
   priceRange?: string
 }) {
   try {
-    // ✅ প্রথমে categories ফেচ করো
+    
     const categoriesRes = await fetch(`${API_URL}/api/categories`, {
       cache: 'no-store',
       headers: {
@@ -134,12 +134,12 @@ export async function getServices(filters?: {
     
     const categoriesData = await categoriesRes.json()
     
-    // ✅ শুধু names বের করো
+    
     const categoryNames = categoriesData?.data?.map((item: any) => item.name) || []
     
     console.log(`📦 Categories:`, categoryNames)
 
-    // Services fetch করো (optional - filters এর জন্য)
+    
     let url = `${API_URL}/api/customer/services`
     const params = new URLSearchParams()
 
@@ -180,7 +180,7 @@ export async function getServices(filters?: {
     
     const data = await res.json()
     
-    // ✅ Categories এবং Services উভয়ই return করো
+    
     return {
       success: true,
       data: {

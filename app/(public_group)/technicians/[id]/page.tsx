@@ -15,7 +15,7 @@ export default async function TechnicianProfilePage({ params }: { params: { id: 
     notFound()
   }
 
-  // ✅ Check login status for Book Now button
+  
   const cookieStore = await cookies()
   const token = cookieStore.get("accessToken")?.value
   const isLoggedIn = !!token

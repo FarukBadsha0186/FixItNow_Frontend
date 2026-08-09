@@ -3,8 +3,6 @@
 import { revalidatePath } from "next/cache"
 import { cookies } from "next/headers"
 
-
-
 export interface Service {
   id: string
   title: string
@@ -42,8 +40,6 @@ export interface CategoriesResponse {
   message?: string
 }
 
-
-
 const getToken = async (): Promise<string | null> => {
   const cookieStore = await cookies()
   return cookieStore.get("accessToken")?.value || null
@@ -51,21 +47,20 @@ const getToken = async (): Promise<string | null> => {
 
 const checkAuth = async (): Promise<{ success: boolean; message?: string }> => {
   const token = await getToken()
-  
+
   if (!token) {
     return {
       success: false,
       message: "Unauthorized. Please login again."
     }
   }
-  
+
   return { success: true }
 }
 
-
+// ✅ GET সব services (FIXED: /my-services)
 export async function getServices(): Promise<ServiceResponse> {
   try {
-    // ✅ Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }
@@ -74,7 +69,7 @@ export async function getServices(): Promise<ServiceResponse> {
     const token = await getToken()
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/services`,
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/my-services`,
       {
         method: "GET",
         headers: {
@@ -85,7 +80,6 @@ export async function getServices(): Promise<ServiceResponse> {
       }
     )
 
-    //  Handle 401
     if (response.status === 401) {
       return {
         success: false,
@@ -116,11 +110,9 @@ export async function getServices(): Promise<ServiceResponse> {
   }
 }
 
-
-
+// ✅ GET একটি service
 export async function getService(serviceId: string): Promise<ServiceActionResponse> {
   try {
-    //  Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }
@@ -136,7 +128,7 @@ export async function getService(serviceId: string): Promise<ServiceActionRespon
     const token = await getToken()
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/services/${serviceId}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/my-services/${serviceId}`,
       {
         method: "GET",
         headers: {
@@ -177,8 +169,7 @@ export async function getService(serviceId: string): Promise<ServiceActionRespon
   }
 }
 
-
-
+// ✅ CREATE service
 export async function createService(data: {
   title: string
   description: string
@@ -186,13 +177,11 @@ export async function createService(data: {
   categoryId: string
 }): Promise<ServiceActionResponse> {
   try {
-    //  Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }
     }
 
-    //  Validate input
     if (!data.title || data.title.trim().length === 0) {
       return {
         success: false,
@@ -256,9 +245,8 @@ export async function createService(data: {
       }
     }
 
-    //  Revalidate paths
-    revalidatePath("/technician/services")
-    revalidatePath("/technician/dashboard")
+    revalidatePath("/technician_dashboard/services")
+    revalidatePath("/technician_dashboard")
 
     return {
       success: true,
@@ -275,8 +263,7 @@ export async function createService(data: {
   }
 }
 
-
-
+// ✅ UPDATE service (FIXED: PATCH instead of PUT)
 export async function updateService(
   serviceId: string,
   data: {
@@ -287,7 +274,6 @@ export async function updateService(
   }
 ): Promise<ServiceActionResponse> {
   try {
-    //  Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }
@@ -300,7 +286,6 @@ export async function updateService(
       }
     }
 
-    // Validate input
     if (data.title !== undefined && data.title.trim().length === 0) {
       return {
         success: false,
@@ -320,7 +305,7 @@ export async function updateService(
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/services/${serviceId}`,
       {
-        method: "PUT",
+        method: "PATCH",  // ✅ PUT থেকে PATCH এ পরিবর্তন
         headers: {
           "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -345,8 +330,8 @@ export async function updateService(
       }
     }
 
-    revalidatePath("/technician/services")
-    revalidatePath("/technician/dashboard")
+    revalidatePath("/technician_dashboard/services")
+    revalidatePath("/technician_dashboard")
 
     return {
       success: true,
@@ -363,13 +348,12 @@ export async function updateService(
   }
 }
 
-
+// ✅ DELETE service
 export async function deleteService(serviceId: string): Promise<{
   success: boolean
   message?: string
 }> {
   try {
-    //  Check authentication
     const auth = await checkAuth()
     if (!auth.success) {
       return { success: false, message: auth.message }
@@ -411,8 +395,8 @@ export async function deleteService(serviceId: string): Promise<{
       }
     }
 
-    revalidatePath("/technician/services")
-    revalidatePath("/technician/dashboard")
+    revalidatePath("/technician_dashboard/services")
+    revalidatePath("/technician_dashboard")
 
     return {
       success: true,
@@ -428,8 +412,7 @@ export async function deleteService(serviceId: string): Promise<{
   }
 }
 
-
-
+// ✅ GET categories
 export async function getCategories(): Promise<CategoriesResponse> {
   try {
     const token = await getToken()
@@ -444,7 +427,7 @@ export async function getCategories(): Promise<CategoriesResponse> {
         },
         cache: "force-cache",
         next: {
-          revalidate: 3600, // 1 hour
+          revalidate: 3600,
         },
       }
     )
@@ -472,67 +455,6 @@ export async function getCategories(): Promise<CategoriesResponse> {
 
   } catch (error) {
     console.error("Error fetching categories:", error)
-    return {
-      success: false,
-      message: "Something went wrong. Please try again."
-    }
-  }
-}
-
-
-
-export async function getServiceStats(): Promise<{
-  success: boolean
-  data?: {
-    total: number
-    categories: { categoryId: string; categoryName: string; count: number }[]
-  }
-  message?: string
-}> {
-  try {
-    //  Check authentication
-    const auth = await checkAuth()
-    if (!auth.success) {
-      return { success: false, message: auth.message }
-    }
-
-    const token = await getToken()
-
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/technician/services/stats`,
-      {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        cache: "no-store",
-      }
-    )
-
-    if (response.status === 401) {
-      return {
-        success: false,
-        message: "Session expired. Please login again."
-      }
-    }
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      return {
-        success: false,
-        message: data.message || "Failed to fetch service stats"
-      }
-    }
-
-    return {
-      success: true,
-      data: data.data
-    }
-
-  } catch (error) {
-    console.error("Error fetching service stats:", error)
     return {
       success: false,
       message: "Something went wrong. Please try again."

@@ -60,7 +60,7 @@ export const getMe = async () => {
     try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/auth/me`, {
             headers: {
-                "Authorization": `Bearer ${accessToken}`  // ✅ এটা change করো
+                "Authorization": `Bearer ${accessToken}`  
             },
             cache: "force-cache",
             next: {

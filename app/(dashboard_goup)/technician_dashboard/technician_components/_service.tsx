@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Plus, Loader2, Edit, Trash2 } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -11,16 +11,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 
 export interface ServicesPageProps {
   services: Array<{
@@ -150,14 +140,10 @@ export function ServicesPage({
   services, 
   categories, 
   onCreateService,
-  onUpdateService,
-  onDeleteService
 }: ServicesPageProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [selectedService, setSelectedService] = useState<any>(null)
   const [isCreating, setIsCreating] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
 
   const handleCreateService = async (data: any) => {
     setIsCreating(true)
@@ -166,38 +152,6 @@ export function ServicesPage({
     } finally {
       setIsCreating(false)
     }
-  }
-
-  const handleUpdateService = async (data: any) => {
-    setIsCreating(true)
-    try {
-      await onUpdateService(selectedService.id, data)
-      setSelectedService(null)
-    } finally {
-      setIsCreating(false)
-    }
-  }
-
-  const handleDeleteService = async () => {
-    if (!selectedService) return
-    setIsDeleting(true)
-    try {
-      await onDeleteService(selectedService.id)
-      setDeleteDialogOpen(false)
-      setSelectedService(null)
-    } finally {
-      setIsDeleting(false)
-    }
-  }
-
-  const openEditDialog = (service: any) => {
-    setSelectedService(service)
-    setDialogOpen(true)
-  }
-
-  const openDeleteDialog = (service: any) => {
-    setSelectedService(service)
-    setDeleteDialogOpen(true)
   }
 
   return (
@@ -225,7 +179,7 @@ export function ServicesPage({
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
-            <div key={service.id} className="rounded-lg border border-border bg-card p-6 relative group">
+            <div key={service.id} className="rounded-lg border border-border bg-card p-6">
               <div className="mb-4 flex items-start justify-between">
                 <h3 className="text-lg font-semibold text-foreground">{service.title}</h3>
                 <Badge variant="outline">{service.category.name}</Badge>
@@ -241,26 +195,6 @@ export function ServicesPage({
                 </span>
                 <span className="text-sm text-muted-foreground">per service</span>
               </div>
-
-              {/* Action Buttons */}
-              <div className="absolute top-4 right-20 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8"
-                  onClick={() => openEditDialog(service)}
-                >
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-red-500 hover:text-red-700"
-                  onClick={() => openDeleteDialog(service)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
             </div>
           ))}
         </div>
@@ -271,29 +205,10 @@ export function ServicesPage({
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         categories={categories}
-        onSave={selectedService ? handleUpdateService : handleCreateService}
+        onSave={handleCreateService}
         isLoading={isCreating}
         editData={selectedService}
       />
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Service</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete "{selectedService?.title}"? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteService} disabled={isDeleting} className="bg-red-500 hover:bg-red-600">
-              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   )
 }

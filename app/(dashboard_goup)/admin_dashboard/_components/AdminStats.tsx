@@ -3,7 +3,7 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { Users, UserCheck, UserX, Calendar, Clock, CheckCircle, DollarSign } from "lucide-react"
 
-// ✅ Make stats optional with default values
+//  Make stats optional with default values
 interface AdminStatsProps {
   stats?: {
     totalUsers: number
@@ -51,7 +51,7 @@ export function AdminStats({ stats, isLoading = false }: AdminStatsProps) {
     )
   }
 
-  // ✅ Default values if stats is null/undefined
+  //  Default values if stats is null/undefined
   const safeStats = {
     totalUsers: stats?.totalUsers ?? 0,
     activeUsers: stats?.activeUsers ?? 0,
