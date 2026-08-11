@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,9 +15,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Star, MapPin, Clock, Search, X, SlidersHorizontal, ChevronDown, Loader2, Calendar, CheckCircle } from "lucide-react"
+import { Star, MapPin, Clock, Search, X, SlidersHorizontal, ChevronDown, Loader2, Calendar, ArrowRight } from "lucide-react"
 import { toast } from "sonner"
 
+
+// 1️⃣ SEARCH BAR
 
 export function SearchBar({ 
   onSearch, 
@@ -78,6 +79,12 @@ export function SearchBar({
 }
 
 
+//  ADVANCED FILTERS
+
+
+
+//  ADVANCED FILTERS 
+
 export function AdvancedFilters({ 
   categories, 
   onFilterChange,
@@ -135,10 +142,23 @@ export function AdvancedFilters({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {categories?.map((cat) => (
-                //  <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
+             
+                {categories?.map((cat) => {
+                  
+                  if (typeof cat === 'string') {
+                    return (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    )
+                  }
+                  
+                  return (
+                    <SelectItem key={cat.id || cat.name} value={cat.name || cat}>
+                      {cat.name || cat}
+                    </SelectItem>
+                  )
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -205,35 +225,143 @@ export function AdvancedFilters({
 }
 
 
+// CATEGORY CARD WITH DESCRIPTION (For Homepage)
 
-export function ServiceCard({ service }: { service: string }) {
-  const categoryName = service || "Unknown"  // service is now just a string like "Electrical"
+export function CategoryCardWithDescription({ category }: { category: any }) {
+  const getCategoryIcon = (name: string) => {
+    const icons: Record<string, string> = {
+      'Electrical': '',
+      'Plumbing': '',
+      'Cleaning': '',
+      'Carpentry': '',
+      'Painting': '',
+      'Gardening': '',
+      'HVAC': '',
+      'Appliance': ''
+    }
+    return icons[name] || '🔧'
+  }
+
+  const getCategoryColor = (name: string) => {
+    const colors: Record<string, string> = {
+      'Electrical': 'from-yellow-500 to-orange-500',
+      'Plumbing': 'from-blue-500 to-cyan-500',
+      'Cleaning': 'from-green-500 to-emerald-500',
+      'Carpentry': 'from-amber-500 to-orange-600',
+      'Painting': 'from-pink-500 to-rose-500',
+      'Gardening': 'from-green-600 to-lime-500',
+      'HVAC': 'from-red-500 to-pink-500',
+      'Appliance': 'from-purple-500 to-indigo-500'
+    }
+    return colors[name] || 'from-indigo-500 to-purple-500'
+  }
 
   return (
-    <Link href={`/services?category=${categoryName}`}>
-      <Card className="overflow-hidden hover:shadow-lg transition cursor-pointer group h-full">
+    <Link href={`/services?category=${category.name}`}>
+      <div className="bg-white rounded-lg shadow overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full">
+        <div className={`h-48 bg-gradient-to-br ${getCategoryColor(category.name)} flex items-center justify-center`}>
+          <span className="text-7xl text-white">
+            {getCategoryIcon(category.name)}
+          </span>
+        </div>
+        <div className="p-5">
+          <h3 className="font-bold text-xl text-gray-900">
+            {category.name}
+          </h3>
+          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+            {category.description || `${category.name} services for your home`}
+          </p>
+          <div className="mt-4 flex items-center justify-between">
+            <span className="text-xs text-gray-400">Available now</span>
+            <ArrowRight className="w-4 h-4 text-indigo-600" />
+          </div>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+
+//  CATEGORY GRID WITH DESCRIPTION (For Homepage)
+
+export function CategoryGridWithDescription({ categories, isLoading = false }: { categories: any[]; isLoading?: boolean }) {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="animate-pulse">
+            <div className="bg-gray-200 h-48 rounded-t-lg" />
+            <div className="bg-white p-4 space-y-3 rounded-b-lg">
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
+              <div className="h-3 bg-gray-200 rounded w-1/2" />
+            </div>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  if (!categories || categories.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">No categories found</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {categories.map((category) => (
+        <CategoryCardWithDescription key={category.id} category={category} />
+      ))}
+    </div>
+  )
+}
+
+
+//  SERVICE CARD
+
+export function ServiceCard({ service }: { service: any }) {
+  const title = service?.title || "Untitled Service"
+  const description = service?.description || "No description"
+  const price = service?.price || 0
+  const categoryName = service?.category?.name || "General"
+  const technicianName = service?.technician?.user?.name || "Technician"
+
+  return (
+    //<Link href={`/services/${service.id}`}>
+      <Card className="overflow-hidden hover:shadow-lg transition cursor-pointer h-full">
         <div className="relative h-48 w-full bg-gradient-to-br from-indigo-100 to-indigo-200 flex items-center justify-center">
           <div className="text-6xl">🔧</div>
         </div>
 
         <CardHeader className="pb-2">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-lg line-clamp-1">{categoryName}</CardTitle>
+          <div className="flex justify-between items-center gap-2">
+            <CardTitle className="text-lg line-clamp-1">{title}</CardTitle>
+            <Badge variant="outline" className="text-xs whitespace-nowrap">
+              {categoryName}
+            </Badge>
           </div>
         </CardHeader>
 
         <CardContent className="pb-2 space-y-2">
-          <p className="text-sm text-gray-500">Browse all services in this category</p>
+          <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-gray-500">by {technicianName}</span>
+          </div>
         </CardContent>
 
-        <CardFooter>
-          <Button className="w-full">View Services</Button>
-        </CardFooter>
+        {/* <CardFooter className="flex items-center justify-between">
+          <span className="font-bold text-primary">${price}/hr</span>
+          <Button size="sm">View Details</Button>
+        </CardFooter> */}
       </Card>
-    </Link>
+   // </Link>
   )
 }
 
+
+//  SERVICE GRID
 
 export function ServiceGrid({ services, isLoading = false }: { services: any[]; isLoading?: boolean }) {
   if (isLoading) {
@@ -267,15 +395,15 @@ export function ServiceGrid({ services, isLoading = false }: { services: any[]; 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {services.map((service) => (
-        <ServiceCard key={service} service={service} />
+        <ServiceCard key={service.id} service={service} />
       ))}
     </div>
   )
 }
 
-// ============================================
-// 5️⃣ TECHNICIAN CARD
-// ============================================
+
+//  TECHNICIAN CARD
+
 export function TechnicianCard({ technician }: { technician: any }) {
   const name = technician?.user?.name || "Unknown"
   const rating = technician?.avgRating || 0
@@ -283,7 +411,6 @@ export function TechnicianCard({ technician }: { technician: any }) {
   const location = technician?.location || "N/A"
   const hourlyRate = technician?.hourlyRate || 0
   const isAvailable = technician?.isAvailable !== false
-  const image = technician?.user?.image || null
   const services = technician?.services || []
 
   return (
@@ -292,7 +419,6 @@ export function TechnicianCard({ technician }: { technician: any }) {
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
             <Avatar className="w-12 h-12">
-              <AvatarImage src={image || undefined} />
               <AvatarFallback className="text-xl bg-primary/10">{name.charAt(0) || "?"}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
@@ -331,9 +457,9 @@ export function TechnicianCard({ technician }: { technician: any }) {
   )
 }
 
-// ============================================
-// 6️⃣ TECHNICIAN GRID
-// ============================================
+
+//  TECHNICIAN GRID
+
 export function TechnicianGrid({ technicians, isLoading = false }: { technicians: any[]; isLoading?: boolean }) {
   if (isLoading) {
     return (
@@ -371,9 +497,9 @@ export function TechnicianGrid({ technicians, isLoading = false }: { technicians
   )
 }
 
-// ============================================
-// 7️⃣ TECHNICIAN PROFILE
-// ============================================
+
+//  TECHNICIAN PROFILE
+
 export function TechnicianProfile({ 
   technician, 
   reviews = [], 
@@ -383,9 +509,6 @@ export function TechnicianProfile({
   reviews?: any[]
   isLoggedIn?: boolean 
 }) {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
-  const [selectedTime, setSelectedTime] = useState<string | null>(null)
-
   const name = technician?.user?.name || "Unknown"
   const rating = technician?.avgRating || 0
   const totalReviews = technician?.totalReviews || 0
@@ -393,7 +516,6 @@ export function TechnicianProfile({
   const hourlyRate = technician?.hourlyRate || 0
   const isAvailable = technician?.isAvailable !== false
   const bio = technician?.bio || "No bio available"
-  const image = technician?.user?.image || null
   const skills = technician?.services?.map((s: any) => s.title) || []
 
   const handleBookNow = (e: React.MouseEvent) => {
@@ -407,12 +529,10 @@ export function TechnicianProfile({
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
-      {/* Profile Card */}
       <Card>
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
             <Avatar className="w-24 h-24 md:w-32 md:h-32">
-              <AvatarImage src={image || "/default-avatar.png"} alt={name} />
               <AvatarFallback className="text-3xl md:text-4xl bg-indigo-100 text-indigo-600">
                 {name.charAt(0) || "?"}
               </AvatarFallback>
@@ -463,7 +583,6 @@ export function TechnicianProfile({
         </CardContent>
       </Card>
 
-      {/* About */}
       <Card>
         <CardContent className="p-6">
           <h3 className="font-semibold text-lg mb-2">About</h3>
@@ -471,7 +590,6 @@ export function TechnicianProfile({
         </CardContent>
       </Card>
 
-      {/* Reviews */}
       <Card>
         <CardContent className="p-6">
           <h3 className="font-semibold text-lg mb-4">Reviews ({reviews.length})</h3>
@@ -498,7 +616,6 @@ export function TechnicianProfile({
         </CardContent>
       </Card>
 
-      {/* Availability Schedule */}
       {technician?.availability && technician.availability.length > 0 && (
         <Card>
           <CardHeader>
@@ -529,97 +646,3 @@ export function TechnicianProfile({
     </div>
   )
 }
-
-
-export function HomePage({
-  initialServices = [],
-  initialTechnicians = [],
-  categories = [],
-}: {
-  initialServices?: any[]
-  initialTechnicians?: any[]
-  categories?: any[]
-}) {
-  const [services, setServices] = useState(initialServices)
-  const [technicians, setTechnicians] = useState(initialTechnicians)
-  const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState("services")
-  const [filters, setFilters] = useState({
-    search: "",
-    category: "all",
-    location: "all",
-    rating: "all",
-    priceRange: "all",
-  })
-
-  const loadData = async (newFilters: any) => {
-    setLoading(true)
-    try {
-      const params = new URLSearchParams()
-      if (newFilters.search) params.append("search", newFilters.search)
-      if (newFilters.category && newFilters.category !== "all") params.append("categoryId", newFilters.category)
-      if (newFilters.location && newFilters.location !== "all") params.append("location", newFilters.location)
-      if (newFilters.rating && newFilters.rating !== "all") params.append("minRating", newFilters.rating)
-      if (newFilters.priceRange && newFilters.priceRange !== "all") {
-        const [min, max] = newFilters.priceRange.split("-")
-        if (min) params.append("minPrice", min)
-        if (max) params.append("maxPrice", max)
-      }
-
-      const [servicesRes, techniciansRes] = await Promise.all([
-        fetch(`/api/customer/services?${params}`),
-        fetch(`/api/customer/technicians?${params}`),
-      ])
-
-      const servicesData = await servicesRes.json()
-      const techniciansData = await techniciansRes.json()
-
-      if (servicesData.success) setServices(servicesData.data || [])
-      if (techniciansData.success) setTechnicians(techniciansData.data || [])
-    } catch (error) {
-      toast.error("Failed to load data")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleSearch = (term: string) => {
-    const newFilters = { ...filters, search: term }
-    setFilters(newFilters)
-    loadData(newFilters)
-  }
-
-  const handleFilterChange = (newFilters: any) => {
-    
-    const updated = { ...filters, ...newFilters }
-    setFilters(updated)
-    loadData(updated)
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
-      <SearchBar onSearch={handleSearch} />
-      <AdvancedFilters categories={categories} onFilterChange={handleFilterChange} />
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
-          <TabsTrigger value="services">Services</TabsTrigger>
-          <TabsTrigger value="technicians">Technicians</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="services" className="mt-6">
-          <ServiceGrid services={services} isLoading={loading} />
-        </TabsContent>
-
-        <TabsContent value="technicians" className="mt-6">
-          <TechnicianGrid technicians={technicians} isLoading={loading} />
-        </TabsContent>
-      </Tabs>
-    </div>
-  )
-}
-
-
-// {services.map((service, index) => (
-//   <ServiceCard key={index} service={service} />
-// ))}

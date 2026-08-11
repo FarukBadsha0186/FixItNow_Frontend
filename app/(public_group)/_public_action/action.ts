@@ -1,37 +1,99 @@
+
 "use server"
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL
 
+// export async function getTechnicians(filters?: {
+//   search?: string
+//   category?: string
+//   location?: string
+//   rating?: string
+//   priceRange?: string
+// }) {
+//   try {
+//     let url = `${API_URL}/api/categories`
+//     const params = new URLSearchParams()
+
+//     if (filters?.search) {
+//       params.append('search', filters.search)  
+//     }
+    
+//     if (filters?.category && filters.category !== 'all') {
+//       params.append('categoryId', filters.category)
+//     }
+    
+//     if (filters?.location && filters.location !== 'all') {
+//       params.append('location', filters.location)
+//     }
+    
+//     if (filters?.rating && filters.rating !== 'all') {
+//       params.append('minRating', filters.rating)
+//     }
+
+//     if (params.toString()) {
+//       url += `?${params.toString()}`
+//     }
+
+//     console.log(`🔍 Fetching technicians: ${url}`)  
+//     const res = await fetch(url, { 
+//       cache: 'no-store',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       }
+//     })
+    
+//     const data = await res.json()
+//     console.log(`✅ Technicians response:`, data) 
+    
+//     return data
+//   } catch (error) {
+//     console.error('Error fetching technicians:', error)
+//     return { success: false, data: [], message: 'Failed to fetch technicians' }
+//   }
+// }
 
 
-
+// action.ts
 export async function getTechnicians(filters?: {
   search?: string
-  category?: string
+  category?: string  
   location?: string
   rating?: string
   priceRange?: string
 }) {
   try {
     
-    let url = `${API_URL}/api/customer/technicians`
+    let categoryId = undefined
+    
+    if (filters?.category && filters.category !== 'all') {
+      
+      const categoriesRes = await fetch(`${API_URL}/api/categories`, {
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      const categoriesData = await categoriesRes.json()
+      
+      const category = categoriesData?.data?.find((c: any) => c.name === filters.category)
+      categoryId = category?.id
+      
+      console.log(`🔍 Category: ${filters.category} → ID: ${categoryId}`)
+    }
+
+    let url = `${API_URL}/api/technicians`  
     const params = new URLSearchParams()
 
-    
     if (filters?.search) {
       params.append('search', filters.search)  
     }
     
     
-    if (filters?.category && filters.category !== 'all') {
-      params.append('categoryId', filters.category)
+    if (categoryId) {
+      params.append('categoryId', categoryId)
     }
-    
     
     if (filters?.location && filters.location !== 'all') {
       params.append('location', filters.location)
     }
-    
     
     if (filters?.rating && filters.rating !== 'all') {
       params.append('minRating', filters.rating)
@@ -41,7 +103,8 @@ export async function getTechnicians(filters?: {
       url += `?${params.toString()}`
     }
 
-    console.log(`🔍 Fetching technicians: ${url}`)  
+    console.log(`🔍 Fetching technicians: ${url}`)
+    
     const res = await fetch(url, { 
       cache: 'no-store',
       headers: {
@@ -50,7 +113,7 @@ export async function getTechnicians(filters?: {
     })
     
     const data = await res.json()
-    console.log(` Technicians response:`, data) 
+    console.log(` Technicians response:`, data)
     
     return data
   } catch (error) {
@@ -58,7 +121,6 @@ export async function getTechnicians(filters?: {
     return { success: false, data: [], message: 'Failed to fetch technicians' }
   }
 }
-
 
 export async function getTechnician(id: string) {
   try {
@@ -80,8 +142,6 @@ export async function getTechnician(id: string) {
   }
 }
 
-
-
 export async function getCategories() {
   try {
     const res = await fetch(`${API_URL}/api/categories`, {
@@ -96,14 +156,12 @@ export async function getCategories() {
     }
     
     const result = await res.json()
-    
+    console.log("📦 Categories API Response:", result)
     
     if (result.success && result.data) {
-      const categoryNames = result.data.map((item: any) => item.name)
-      
       return {
         success: true,
-        data: categoryNames,  // ["Electrical"]
+        data: result.data,
         message: result.message
       }
     }
@@ -124,31 +182,40 @@ export async function getServices(filters?: {
   priceRange?: string
 }) {
   try {
-    
+    // Fetch categories first
     const categoriesRes = await fetch(`${API_URL}/api/categories`, {
       cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+      headers: { 'Content-Type': 'application/json' }
     })
     
     const categoriesData = await categoriesRes.json()
+    console.log("📦 Categories Data:", categoriesData)
     
-    
-    const categoryNames = categoriesData?.data?.map((item: any) => item.name) || []
-    
-    console.log(`📦 Categories:`, categoryNames)
+    // Create category map
+    const categoryMap = new Map<string, string>()
+    if (categoriesData?.data && Array.isArray(categoriesData.data)) {
+      categoriesData.data.forEach((cat: any) => {
+        if (cat.name && cat.id) {
+          categoryMap.set(cat.name, cat.id)
+        }
+      })
+    }
+    console.log("🗺️ Category Map:", categoryMap)
 
-    
     let url = `${API_URL}/api/customer/services`
     const params = new URLSearchParams()
 
     if (filters?.search) {
-      params.append('search', filters.search) 
+      params.append('search', filters.search)
     }
     
+    // Convert category NAME to ID
     if (filters?.category && filters.category !== 'all') {
-      params.append('category', filters.category)
+      const categoryId = categoryMap.get(filters.category)
+      if (categoryId) {
+        params.append('categoryId', categoryId)
+        console.log(`✅ Category '${filters.category}' → ID: ${categoryId}`)
+      }
     }
     
     if (filters?.location && filters.location !== 'all') {
@@ -158,7 +225,7 @@ export async function getServices(filters?: {
     if (filters?.rating && filters.rating !== 'all') {
       params.append('minRating', filters.rating)
     }
-    
+
     if (filters?.priceRange && filters.priceRange !== 'all') {
       const [min, max] = filters.priceRange.split('-')
       if (min) params.append('minPrice', min)
@@ -169,22 +236,20 @@ export async function getServices(filters?: {
       url += `?${params.toString()}`
     }
 
-    console.log(`🔍 Fetching services: ${url}`)
+    console.log(`🔍 Fetching services from: ${url}`)
 
     const res = await fetch(url, { 
       cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      }
+      headers: { 'Content-Type': 'application/json' }
     })
     
     const data = await res.json()
-    
+    console.log(" Services Response:", data)
     
     return {
       success: true,
       data: {
-        categories: categoryNames,  // ["Electrical", "Plumbing", ...]
+        categories: categoriesData?.data || [],
         services: data?.data || []
       },
       message: 'Data fetched successfully'
